@@ -36,21 +36,25 @@ public class MovableObject extends Node {
         addChild(translationNode);
     }
     /** "Er beinhaltet auf unterster Ebene die Geometrie des Objektes." */
-    Node geometryNode; //TriangleMeshNode,SingleTriangleNode,etc.
+    private Node geometryNode; //TriangleMeshNode,SingleTriangleNode,etc.
     
     /** "Darüber benötigt er einen Skaliserungsknoten, falls die Geometrie 
      * verformt werden soll." */
-    ScaleNode scaleNode;
+    private ScaleNode scaleNode;
     
     /** "Darüber hat er einen Rotationsknoten." */
-    RotationNode rotationNode;
+    private RotationNode rotationNode;
     
     /** "An oberster Stelle wird ein Translationsknoten benötigt." */
-    TranslationNode translationNode;
+    private TranslationNode translationNode;
     
     /** "[...] Speichern Sie daher in jedem MovableObject eine Liste von 
      * Wegpunkten (jeweils als Vector3 ab)." */
-    List<Vector3> waypoints = new ArrayList<>();
+    private List<Vector3> waypoints = new ArrayList<>();
+    
+    private Vector3 position = new Vector3();
+    
+    private double alpha = 0.0;
     
     /** "Damit Bewegung in die Szene kommt, muss sich der Wert von alpha zur
      * Laufzeit verändern. Implementieren Sie dazu in der Klasse MoveableObjects

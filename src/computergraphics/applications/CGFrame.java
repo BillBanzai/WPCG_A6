@@ -6,14 +6,19 @@
 package computergraphics.applications;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import computergraphics.datastructures.ITriangleMesh;
+import computergraphics.datastructures.ObjIO;
+import computergraphics.datastructures.TriangleMesh;
 import computergraphics.framework.AbstractCGFrame;
 import computergraphics.math.Vector3;
 import computergraphics.scenegraph.ColorNode;
 import computergraphics.scenegraph.TranslationNode;
 import computergraphics.scenegraph.TriangleMeshNode;
 import computergraphics.util.Heightfield;
+import computergraphics.scenegraph.MovableObject;
 
 /**
  * Application for the first exercise.
@@ -37,10 +42,8 @@ public class CGFrame extends AbstractCGFrame {
 	 */
 	public CGFrame(int timerInverval) throws IOException {
 		super(timerInverval);
-		//String colorPath = "img/Color8x8.png";
 		String colorPath = "img/color.png";
 		String heightmapPath = "img/heightField.png";
-		//String heightmapPath = "img/Color8x8.png";
 		
 		
 		//heightfield: aus bild
@@ -55,11 +58,43 @@ public class CGFrame extends AbstractCGFrame {
 		// Colornode erstellen für farbliche Darstellung
 		ColorNode colorNode = new ColorNode(new Vector3(0, 0.5, 0));
 		
+		MovableObject mob = makeMoveableObject();
+		
 		getRoot().addChild(translationNode);
 		translationNode.addChild(colorNode);
 		colorNode.addChild(heightfieldNode);
+		colorNode.addChild(mob);
 	}
 	
+    private MovableObject makeMoveableObject() {
+        //1. Die kugel erzeugen 
+        ITriangleMesh ball = new TriangleMesh();
+        
+        ObjIO objIO = new ObjIO();
+        objIO.einlesen("meshes/sphere.obj", ball);
+        
+        ((TriangleMesh)ball).calculateAllNormals();
+        
+        //2a. Kugel in ein TriangleMeshNode stecken
+        TriangleMeshNode ballNode = new TriangleMeshNode(ball);
+        
+        //2b. Skalierung der kugel von ScaleNode
+        Vector3 scaleFromResolution = new Vector3(1.0/64d,1.0/64d,1.0/64d);
+        
+        //3. Die wegpunkte für die kugel erzeugen
+        // Im uhrzeigersinn 
+        Vector3 upLeft = new Vector3(0,0,0);
+        Vector3 upRight = new Vector3(0,0,1);
+        Vector3 downRight = new Vector3(1,0,1);
+        Vector3 downLeft = new Vector3(1,0,0);
+        List<Vector3> waypoints = Arrays.asList(upLeft,upRight,downRight
+                ,downLeft);
+        
+        // MoveableObject erzeugen
+        return new MovableObject(ballNode, scaleFromResolution ,
+                new Vector3(0,0,0), 0.0f, waypoints);
+    }
+
     /*
 	 * (nicht-Javadoc)
 	 * 
