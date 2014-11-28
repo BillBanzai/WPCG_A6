@@ -5,9 +5,13 @@
  */
 package computergraphics.applications;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import computergraphics.datastructures.ITriangleMesh;
 import computergraphics.datastructures.ObjIO;
@@ -60,7 +64,7 @@ public class CGFrame extends AbstractCGFrame {
 		// Colornode erstellen für farbliche Darstellung
 		ColorNode colorNode = new ColorNode(new Vector3(0, 0.5, 0));
 		
-		movableObject = makeMoveableObject();
+		movableObject = makeMoveableObject(heightmapPath,MAX_HEIGHT);
 		
 		getRoot().addChild(translationNode);
 		translationNode.addChild(colorNode);
@@ -68,7 +72,8 @@ public class CGFrame extends AbstractCGFrame {
 		colorNode.addChild(movableObject);
 	}
 	
-    private MovableObject makeMoveableObject() {
+    private MovableObject makeMoveableObject(String heightmapPath,
+            double maxHeight) throws IOException {
         //1. Die kugel erzeugen 
         ITriangleMesh ball = new TriangleMesh();
         
@@ -94,9 +99,12 @@ public class CGFrame extends AbstractCGFrame {
         waypoints = Arrays.asList(upLeft,downLeft,downRight
                 ,upRight);
         
+        //4. Höhenwerte bereitstellen durch einlesen
+        BufferedImage heightmapFile = ImageIO.read(new File(heightmapPath));
+        
         // MoveableObject erzeugen
         return new MovableObject(ballNode, scaleFromResolution ,
-                new Vector3(0,0,0), 0.0f, waypoints);
+                new Vector3(0,0,0), 0.0f, waypoints,heightmapFile, maxHeight);
     }
 
     /*
