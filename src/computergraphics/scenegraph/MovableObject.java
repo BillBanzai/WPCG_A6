@@ -52,7 +52,7 @@ public class MovableObject extends Node {
      * Wegpunkten (jeweils als Vector3 ab)." */
     private List<Vector3> waypoints = new ArrayList<>();
     
-    private Vector3 position = new Vector3();
+    //position wird im Translations-Knoten gesetzt
     
     private double alpha = 0.0;
     
@@ -60,6 +60,16 @@ public class MovableObject extends Node {
      * Laufzeit verändern. Implementieren Sie dazu in der Klasse MoveableObjects
      */
     public void tick() {
+        //1.Aktuelle Position berechnen
+        //Position p0: aktueller Wegpunkt waypoints.get(0)
+        //Position p1: nächster Wegpunkt waypoints.get(1)
+        
+        //2.Berechnete position im Translationsknoten setzen
+        
+        //3.Alpha erhöhen
+        
+        /* Bei Bedarf alpha zurück auf 0 setzen und dann auch vordersten
+         * Wegpunkt ans Ende der Liste setzen. */
         
     }
 
