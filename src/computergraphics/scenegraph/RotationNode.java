@@ -44,6 +44,7 @@ public class RotationNode extends Node {
 				gl.glPushMatrix();
 
 		// cast von double auf float, um openGL-Funktion verwenden zu k�nnen. 
+		//TODO entscheiden ob glRotatef oder glRotated
 		gl.glRotatef(angle, (float) rotAxis.get(0), (float) rotAxis.get(1), (float) rotAxis.get(2));		
 		
 		// Draw all children
