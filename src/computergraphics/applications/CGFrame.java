@@ -86,7 +86,7 @@ public class CGFrame extends AbstractCGFrame {
         TriangleMeshNode ballNode = new TriangleMeshNode(ball);
         
         //2b. Skalierung der kugel von ScaleNode
-        Vector3 scaleFromResolution = new Vector3(1.0/64d,1.0/64d,1.0/64d);
+        Vector3 scaleFromResolution = new Vector3(3.0/64d,1.0/64d,1.0/64d);
         
         //3. Die wegpunkte für die kugel erzeugen
         // Im uhrzeigersinn 
