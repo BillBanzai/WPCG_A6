@@ -19,7 +19,7 @@ import computergraphics.math.Vector3;
 public class MovableObject extends Node {
     
     /*"Darin wird der Wert von α um einen festen Wert erhöht (z.B. 0.05)"*/
-    private static final double INTERPOLATION_INCREMENT = 0.05;
+    private static final double INTERPOLATION_INCREMENT = 0.0005;
 
     public MovableObject(Node geometryNode,Vector3 scale, Vector3 rotAxis, 
             float rotAngle, List<Vector3> waypoints) {

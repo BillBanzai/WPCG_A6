@@ -107,7 +107,6 @@ public class CGFrame extends AbstractCGFrame {
 	@Override
 	protected void timerTick() {
 	    if(movableObject != null) { movableObject.tick(); }
-	    System.out.println("Tick");
 	}
 
 	/**
@@ -115,6 +114,6 @@ public class CGFrame extends AbstractCGFrame {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		new CGFrame(1000);
+		new CGFrame(5);
 	}
 }
