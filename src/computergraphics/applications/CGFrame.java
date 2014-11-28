@@ -67,7 +67,7 @@ public class CGFrame extends AbstractCGFrame {
 	 */
 	@Override
 	protected void timerTick() {
-		// System.out.println("Tick");
+		 System.out.println("Tick");
 	}
 
 	/**
