@@ -35,6 +35,8 @@ public class CGFrame extends AbstractCGFrame {
 	/* "[...] beispielsweise weiß entspricht einem y‐Wert von 0.1."*/
 	private static final double MAX_HEIGHT = 0.3;
 	private static final int DEFAULT_RESOLUTION = 800; //8x8
+	
+	private MovableObject movableObject;
 
 	/**
 	 * Constructor.
@@ -58,12 +60,12 @@ public class CGFrame extends AbstractCGFrame {
 		// Colornode erstellen für farbliche Darstellung
 		ColorNode colorNode = new ColorNode(new Vector3(0, 0.5, 0));
 		
-		MovableObject mob = makeMoveableObject();
+		movableObject = makeMoveableObject();
 		
 		getRoot().addChild(translationNode);
 		translationNode.addChild(colorNode);
 		colorNode.addChild(heightfieldNode);
-		colorNode.addChild(mob);
+		colorNode.addChild(movableObject);
 	}
 	
     private MovableObject makeMoveableObject() {
@@ -89,6 +91,8 @@ public class CGFrame extends AbstractCGFrame {
         Vector3 downLeft = new Vector3(1,0,0);
         List<Vector3> waypoints = Arrays.asList(upLeft,upRight,downRight
                 ,downLeft);
+        waypoints = Arrays.asList(upLeft,downLeft,downRight
+                ,upRight);
         
         // MoveableObject erzeugen
         return new MovableObject(ballNode, scaleFromResolution ,
@@ -102,7 +106,8 @@ public class CGFrame extends AbstractCGFrame {
 	 */
 	@Override
 	protected void timerTick() {
-		 System.out.println("Tick");
+	    if(movableObject != null) { movableObject.tick(); }
+	    System.out.println("Tick");
 	}
 
 	/**

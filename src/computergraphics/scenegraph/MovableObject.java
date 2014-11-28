@@ -18,6 +18,9 @@ import computergraphics.math.Vector3;
 /** Diese Klasse ermöglicht es, bewegte Objekte im Szenengraph darzustellen.*/
 public class MovableObject extends Node {
     
+    /*"Darin wird der Wert von α um einen festen Wert erhöht (z.B. 0.05)"*/
+    private static final double INTERPOLATION_INCREMENT = 0.05;
+
     public MovableObject(Node geometryNode,Vector3 scale, Vector3 rotAxis, 
             float rotAngle, List<Vector3> waypoints) {
         /* Den Objektgraphen aus geometryNode, scaleNode, rotationNode, 
@@ -34,6 +37,8 @@ public class MovableObject extends Node {
         translationNode.addChild(rotationNode);
         
         addChild(translationNode);
+        
+        this.waypoints.addAll(waypoints);
     }
     /** "Er beinhaltet auf unterster Ebene die Geometrie des Objektes." */
     private Node geometryNode; //TriangleMeshNode,SingleTriangleNode,etc.
@@ -62,15 +67,24 @@ public class MovableObject extends Node {
     public void tick() {
         //1.Aktuelle Position berechnen
         //Position p0: aktueller Wegpunkt waypoints.get(0)
+        Vector3 p0 = waypoints.get(0);
         //Position p1: nächster Wegpunkt waypoints.get(1)
-        
+        Vector3 p1 = waypoints.get(1);
+        //(1-alpha)*p0 + alpha*p1
+        Vector3 positionNow = p0.multiply(1-alpha).add(p1.multiply(alpha)); 
+       
         //2.Berechnete position im Translationsknoten setzen
+        translationNode.setFactor(positionNow);
         
         //3.Alpha erhöhen
+        alpha += INTERPOLATION_INCREMENT;
         
         /* Bei Bedarf alpha zurück auf 0 setzen und dann auch vordersten
          * Wegpunkt ans Ende der Liste setzen. */
-        
+        if(alpha > 1.0) {
+            alpha = 0;
+            waypoints.add(waypoints.remove(0));
+        }
     }
 
     @Override

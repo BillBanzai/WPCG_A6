@@ -23,7 +23,7 @@ public class TranslationNode extends Node{
 	/**
 	 * Translation factors in x-, y- and z-direction.
 	 */
-	private final Vector3 factor;
+	private Vector3 factor;
 	
 	/**
 	 * Constructor.
@@ -56,6 +56,10 @@ public class TranslationNode extends Node{
 		gl.glPopMatrix();
 		
 	}
+
+    public void setFactor(Vector3 factor) {
+        this.factor = factor;
+    }
 	
 	
 
