@@ -90,6 +90,13 @@ public class MovableObject extends Node {
         
         double y = getHeight(x,z);
         
+        /* Addition mit der y-komponente aus dem faktor aus scaleNode 
+         * sorgt dafür, dass das MovableObject mit seinem untersten punkt 
+         * die Oberfläche des terrains berührt. Durch diese maßnahme ist dafür
+         * gesorgt, "dass sich die Objekte immer genau auf der Oberfläche des 
+         * Höhenfelds befinden". */
+        y += scaleNode.getScale().get(1); 
+        
         positionNow.set(1, y);
         
         //2.Berechnete position im Translationsknoten setzen

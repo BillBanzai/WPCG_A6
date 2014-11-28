@@ -98,6 +98,7 @@ public class CGFrame extends AbstractCGFrame {
                 ,downLeft);
         waypoints = Arrays.asList(upLeft,downLeft,downRight
                 ,upRight);
+        //waypoints = Arrays.asList(upLeft,new Vector3(0.5,0,0.5),downRight);
         
         //4. Höhenwerte bereitstellen durch einlesen
         BufferedImage heightmapFile = ImageIO.read(new File(heightmapPath));

@@ -42,4 +42,8 @@ public class ScaleNode extends Node {
 
 	}
 
+    public Vector3 getScale() {
+        return scale;
+    }
+
 }
