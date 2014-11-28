@@ -47,14 +47,6 @@ public class CGFrame extends AbstractCGFrame {
 		ITriangleMesh heightfield = Heightfield.makeField(DEFAULT_RESOLUTION,
 		        heightmapPath, colorPath, MAX_HEIGHT);
 		
-		//heightfield2: aus funktion
-		ITriangleMesh heightfield2 = Heightfield.makeField(DEFAULT_RESOLUTION,
-		        colorPath,(x,y) -> (Math.sin(x*3*Math.PI)+
-		        Math.cos(y*3*Math.PI))+(Math.random()*10e-4)
-		        ,MAX_HEIGHT );
-		
-		
-		
 		TriangleMeshNode heightfieldNode = new TriangleMeshNode(heightfield); 
 		
 		TranslationNode translationNode = 
