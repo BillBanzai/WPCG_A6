@@ -86,18 +86,35 @@ public class CGFrame extends AbstractCGFrame {
         TriangleMeshNode ballNode = new TriangleMeshNode(ball);
         
         //2b. Skalierung der kugel von ScaleNode
-        Vector3 scaleFromResolution = new Vector3(3.0/64d,1.0/64d,1.0/64d);
+//        Vector3 scaleFromResolution = new Vector3(3.0/64d,1.0/64d,1.0/64d);
+        Vector3 scaleFromResolution = new Vector3(1.0/64d,1.0/64d,1.0/64d);
         
         //3. Die wegpunkte für die kugel erzeugen
         // Im uhrzeigersinn 
-        Vector3 upLeft = new Vector3(0,0,0);
-        Vector3 upRight = new Vector3(0,0,1);
-        Vector3 downRight = new Vector3(1,0,1);
-        Vector3 downLeft = new Vector3(1,0,0);
-        List<Vector3> waypoints = Arrays.asList(upLeft,upRight,downRight
-                ,downLeft);
-        waypoints = Arrays.asList(upLeft,downLeft,downRight
-                ,upRight);
+        
+        // Pfad = Am Rand entlang über die 4 Eckpunkte:
+        Vector3 upLeft = new Vector3(0.10, 0, 0.22);
+        Vector3 upRight = new Vector3(0.10 ,0, 0.22);
+//        Vector3 downRight = new Vector3(1,0,1);
+//        Vector3 downLeft = new Vector3(1,0,0);
+        
+        //Pfad = siehe Pfad in Skizze (rot):
+        Vector3 p1 = new Vector3(0.14, 0, 0.9);
+        Vector3 p2 = new Vector3(0.14, 0, 0.36);
+        Vector3 p3 = new Vector3(0.10, 0, 0.36);
+        Vector3 p4 = new Vector3(0.10, 0, 0.22);
+        
+//        List<Vector3> waypoints = Arrays.asList(upLeft,upRight,downRight
+//                ,downLeft);
+        
+//        List<Vector3> waypoints = Arrays.asList(upLeft, upRight);
+        List<Vector3> waypoints = Arrays.asList(p1, p2, p3, p4);
+        
+//        waypoints = Arrays.asList(upLeft,downLeft,downRight
+//                ,upRight);
+        
+//        waypoints = Arrays.asList(upLeft, upRight);
+      waypoints = Arrays.asList(p1, p2, p3, p4);
         //waypoints = Arrays.asList(upLeft,new Vector3(0.5,0,0.5),downRight);
         
         //4. Höhenwerte bereitstellen durch einlesen

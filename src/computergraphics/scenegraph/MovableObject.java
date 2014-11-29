@@ -15,7 +15,6 @@ import java.util.List;
 
 import javax.media.opengl.GL2;
 
-import computergraphics.datastructures.ITriangleMesh;
 import computergraphics.math.Vector3;
 
 /** Diese Klasse ermöglicht es, bewegte Objekte im Szenengraph darzustellen.*/
