@@ -93,36 +93,42 @@ public class CGFrame extends AbstractCGFrame {
         // Im uhrzeigersinn 
         
         // Pfad = Am Rand entlang über die 4 Eckpunkte:
-        Vector3 upLeft = new Vector3(0.10, 0, 0.22);
-        Vector3 upRight = new Vector3(0.10 ,0, 0.22);
-//        Vector3 downRight = new Vector3(1,0,1);
-//        Vector3 downLeft = new Vector3(1,0,0);
+        Vector3 upLeft = new Vector3(0, 0, 0);
+        Vector3 upRight = new Vector3(0, 0 , 1);
+        Vector3 downRight = new Vector3(1, 0 ,1);
+        Vector3 downLeft = new Vector3(1, 0 ,0);
         
-        //Pfad = siehe Pfad in Skizze (rot):
-        Vector3 p1 = new Vector3(0.14, 0, 0.9);
-        Vector3 p2 = new Vector3(0.14, 0, 0.36);
-        Vector3 p3 = new Vector3(0.10, 0, 0.36);
-        Vector3 p4 = new Vector3(0.10, 0, 0.22);
+        // Pfad = Entlang dem Weg. siehe Pfad in Skizze (rot):
+        Vector3 p1  = new Vector3(0.14,  0, 0.9);
+        Vector3 p2  = new Vector3(0.14,  0, 0.36);
+        Vector3 p3  = new Vector3(0.10,  0, 0.36);
+        Vector3 p4  = new Vector3(0.10,  0, 0.22);
+        Vector3 p5  = new Vector3(0.44,  0, 0.22);
+        Vector3 p6  = new Vector3(0.44,  0, 0.24);
+        Vector3 p7  = new Vector3(0.835, 0, 0.24);
+        Vector3 p8  = new Vector3(0.835, 0, 0.84);
+        Vector3 p9  = new Vector3(0.62 , 0, 0.84);
+        Vector3 p10 = new Vector3(0.62 , 0, 0.9);
+
+        // Pfad = Querfeldein über die Berge. siehe Pfad in Skizze (orange):
+        Vector3 p1_  = new Vector3(0.14,  0, 0.9);
+        Vector3 p5_  = new Vector3(0.44,  0, 0.22);
+        Vector3 p10_ = new Vector3(0.62 , 0, 0.9);
         
-//        List<Vector3> waypoints = Arrays.asList(upLeft,upRight,downRight
-//                ,downLeft);
+        List<Vector3> waypoints_Rand = Arrays.asList(upLeft,upRight,downRight
+                ,downLeft);
         
-//        List<Vector3> waypoints = Arrays.asList(upLeft, upRight);
-        List<Vector3> waypoints = Arrays.asList(p1, p2, p3, p4);
+        List<Vector3> waypoints_Pfad = Arrays.asList(p1, p2, p3, p4, p5, p6, p7,
+        		p8, p9, p10);
         
-//        waypoints = Arrays.asList(upLeft,downLeft,downRight
-//                ,upRight);
-        
-//        waypoints = Arrays.asList(upLeft, upRight);
-      waypoints = Arrays.asList(p1, p2, p3, p4);
-        //waypoints = Arrays.asList(upLeft,new Vector3(0.5,0,0.5),downRight);
+        List<Vector3> waypoints_Berge = Arrays.asList(p1_, p5_, p10_);
         
         //4. Höhenwerte bereitstellen durch einlesen
         BufferedImage heightmapFile = ImageIO.read(new File(heightmapPath));
         
-        // MoveableObject erzeugen
+        // 3 MoveableObject erzeugen mit einem der 3 obigen Pfaden
         return new MovableObject(ballNode, scaleFromResolution ,
-                new Vector3(0,0,0), 0.0f, waypoints,heightmapFile, maxHeight);
+                new Vector3(0,0,0), 0.0f, waypoints_Berge,heightmapFile, maxHeight);
     }
 
     /*
