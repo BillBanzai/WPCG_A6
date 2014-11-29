@@ -40,7 +40,44 @@ public class CGFrame extends AbstractCGFrame {
 	private static final double MAX_HEIGHT = 0.3;
 	private static final int DEFAULT_RESOLUTION = 800; //8x8
 	
-	private MovableObject movableObject;
+    
+    //3. Die wegpunkte für die kugel erzeugen
+    // Im uhrzeigersinn 
+    
+    // Pfad = Am Rand entlang über die 4 Eckpunkte:
+    Vector3 upLeft = new Vector3(0, 0, 0);
+    Vector3 upRight = new Vector3(0, 0 , 1);
+    Vector3 downRight = new Vector3(1, 0 ,1);
+    Vector3 downLeft = new Vector3(1, 0 ,0);
+    
+    // Pfad = Entlang dem Weg. siehe Pfad in Skizze (rot):
+    Vector3 p1  = new Vector3(0.14,  0, 0.9);
+    Vector3 p2  = new Vector3(0.14,  0, 0.36);
+    Vector3 p3  = new Vector3(0.10,  0, 0.36);
+    Vector3 p4  = new Vector3(0.10,  0, 0.22);
+    Vector3 p5  = new Vector3(0.44,  0, 0.22);
+    Vector3 p6  = new Vector3(0.44,  0, 0.24);
+    Vector3 p7  = new Vector3(0.835, 0, 0.24);
+    Vector3 p8  = new Vector3(0.835, 0, 0.84);
+    Vector3 p9  = new Vector3(0.62 , 0, 0.84);
+    Vector3 p10 = new Vector3(0.62 , 0, 0.9);
+
+    // Pfad = Querfeldein über die Berge. siehe Pfad in Skizze (orange):
+    Vector3 p1_  = new Vector3(0.14,  0, 0.9);
+    Vector3 p5_  = new Vector3(0.44,  0, 0.22);
+    Vector3 p10_ = new Vector3(0.62 , 0, 0.9);
+    
+    List<Vector3> waypoints_Rand = Arrays.asList(upLeft,upRight,downRight
+            ,downLeft);
+    
+    List<Vector3> waypoints_Pfad = Arrays.asList(p1, p2, p3, p4, p5, p6, p7,
+    		p8, p9, p10);
+    
+    List<Vector3> waypoints_Berge = Arrays.asList(p1_, p5_, p10_);
+	
+	private MovableObject movableObject1;
+	private MovableObject movableObject2;
+	private MovableObject movableObject3;
 
 	/**
 	 * Constructor.
@@ -64,16 +101,20 @@ public class CGFrame extends AbstractCGFrame {
 		// Colornode erstellen für farbliche Darstellung
 		ColorNode colorNode = new ColorNode(new Vector3(0, 0.5, 0));
 		
-		movableObject = makeMoveableObject(heightmapPath,MAX_HEIGHT);
+		movableObject1 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Rand);
+		movableObject2 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Pfad);
+		movableObject3 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Berge);
 		
 		getRoot().addChild(translationNode);
 		translationNode.addChild(colorNode);
 		colorNode.addChild(heightfieldNode);
-		colorNode.addChild(movableObject);
+		colorNode.addChild(movableObject1);
+		colorNode.addChild(movableObject2);
+		colorNode.addChild(movableObject3);
 	}
 	
     private MovableObject makeMoveableObject(String heightmapPath,
-            double maxHeight) throws IOException {
+            double maxHeight, List<Vector3> wegpunkt) throws IOException {
         //1. Die kugel erzeugen 
         ITriangleMesh ball = new TriangleMesh();
         
@@ -89,46 +130,12 @@ public class CGFrame extends AbstractCGFrame {
 //        Vector3 scaleFromResolution = new Vector3(3.0/64d,1.0/64d,1.0/64d);
         Vector3 scaleFromResolution = new Vector3(1.0/64d,1.0/64d,1.0/64d);
         
-        //3. Die wegpunkte für die kugel erzeugen
-        // Im uhrzeigersinn 
-        
-        // Pfad = Am Rand entlang über die 4 Eckpunkte:
-        Vector3 upLeft = new Vector3(0, 0, 0);
-        Vector3 upRight = new Vector3(0, 0 , 1);
-        Vector3 downRight = new Vector3(1, 0 ,1);
-        Vector3 downLeft = new Vector3(1, 0 ,0);
-        
-        // Pfad = Entlang dem Weg. siehe Pfad in Skizze (rot):
-        Vector3 p1  = new Vector3(0.14,  0, 0.9);
-        Vector3 p2  = new Vector3(0.14,  0, 0.36);
-        Vector3 p3  = new Vector3(0.10,  0, 0.36);
-        Vector3 p4  = new Vector3(0.10,  0, 0.22);
-        Vector3 p5  = new Vector3(0.44,  0, 0.22);
-        Vector3 p6  = new Vector3(0.44,  0, 0.24);
-        Vector3 p7  = new Vector3(0.835, 0, 0.24);
-        Vector3 p8  = new Vector3(0.835, 0, 0.84);
-        Vector3 p9  = new Vector3(0.62 , 0, 0.84);
-        Vector3 p10 = new Vector3(0.62 , 0, 0.9);
-
-        // Pfad = Querfeldein über die Berge. siehe Pfad in Skizze (orange):
-        Vector3 p1_  = new Vector3(0.14,  0, 0.9);
-        Vector3 p5_  = new Vector3(0.44,  0, 0.22);
-        Vector3 p10_ = new Vector3(0.62 , 0, 0.9);
-        
-        List<Vector3> waypoints_Rand = Arrays.asList(upLeft,upRight,downRight
-                ,downLeft);
-        
-        List<Vector3> waypoints_Pfad = Arrays.asList(p1, p2, p3, p4, p5, p6, p7,
-        		p8, p9, p10);
-        
-        List<Vector3> waypoints_Berge = Arrays.asList(p1_, p5_, p10_);
-        
         //4. Höhenwerte bereitstellen durch einlesen
         BufferedImage heightmapFile = ImageIO.read(new File(heightmapPath));
         
         // 3 MoveableObject erzeugen mit einem der 3 obigen Pfaden
         return new MovableObject(ballNode, scaleFromResolution ,
-                new Vector3(0,0,0), 0.0f, waypoints_Berge,heightmapFile, maxHeight);
+                new Vector3(0,0,0), 0.0f, wegpunkt,heightmapFile, maxHeight);
     }
 
     /*
@@ -138,7 +145,9 @@ public class CGFrame extends AbstractCGFrame {
 	 */
 	@Override
 	protected void timerTick() {
-	    if(movableObject != null) { movableObject.tick(); }
+	    if(movableObject1 != null) { movableObject1.tick(); }
+	    if(movableObject2 != null) { movableObject2.tick(); }
+	    if(movableObject3 != null) { movableObject3.tick(); }
 	}
 
 	/**
