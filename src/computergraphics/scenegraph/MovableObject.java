@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.media.opengl.GL2;
 
+import computergraphics.math.Matrix3;
 import computergraphics.math.Vector3;
 
 /** Diese Klasse ermöglicht es, bewegte Objekte im Szenengraph darzustellen.*/
@@ -22,6 +23,8 @@ public class MovableObject extends Node {
     
     /*"Darin wird der Wert von α um einen festen Wert erhöht (z.B. 0.05)"*/
     private static final double INTERPOLATION_INCREMENT = 0.0005;
+
+    private static final Vector3 UP_VECTOR = new Vector3(0,1,0);
 
     public MovableObject(Node geometryNode,Vector3 scale, Vector3 rotAxis, 
             float rotAngle, List<Vector3> waypoints,BufferedImage terrainFile,
@@ -110,6 +113,27 @@ public class MovableObject extends Node {
             alpha = 0;
             waypoints.add(waypoints.remove(0));
         }
+        
+        //4. Entlang aktueller bewegungsrichtung ausrichten
+        alignToMovement(p0,p1);
+    }
+
+    private void alignToMovement(Vector3 p0, Vector3 p1) {
+        /* "Der x-Vektor des Koordinatensystems ist der Vektor von der ersten 
+         * zur Zweitenwegmarke (also p1-p0)." */
+        Vector3 x = p1.subtract(p0);
+        // "Dieser Vektor muss noch normiert werden." 
+        x.normalize();
+        /* "Der y-Vektor ist konstant und zeigt immer "nach oben" 
+         * (also (0,1,0))." */
+        Vector3 y = UP_VECTOR; 
+        /* "Der dritte Vektor muss senkrecht auf den ersten beiden stehen. Sie 
+         * können ihn als Kreuzprodukt aus x und y berechnen." */
+        Vector3 z = x.cross(y);
+        
+        Matrix3 coordinateSystem = new Matrix3(x, y, z);
+        
+        rotationNode.setMatrix(coordinateSystem);
     }
 
     private double getHeight(double x, double z) {

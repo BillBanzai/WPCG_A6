@@ -67,8 +67,8 @@ public class CGFrame extends AbstractCGFrame {
     Vector3 p5_  = new Vector3(0.44,  0, 0.22);
     Vector3 p10_ = new Vector3(0.62 , 0, 0.9);
     
-    List<Vector3> waypoints_Rand = Arrays.asList(upLeft,upRight,downRight
-            ,downLeft);
+    List<Vector3> waypoints_Rand = Arrays.asList(upLeft,upRight,
+            new Vector3(0.5,0,0.5),downRight,downLeft);
     
     List<Vector3> waypoints_Pfad = Arrays.asList(p1, p2, p3, p4, p5, p6, p7,
     		p8, p9, p10);
@@ -127,8 +127,8 @@ public class CGFrame extends AbstractCGFrame {
         TriangleMeshNode ballNode = new TriangleMeshNode(ball);
         
         //2b. Skalierung der kugel von ScaleNode
-//        Vector3 scaleFromResolution = new Vector3(3.0/64d,1.0/64d,1.0/64d);
-        Vector3 scaleFromResolution = new Vector3(1.0/64d,1.0/64d,1.0/64d);
+        Vector3 scaleFromResolution = new Vector3(3.0/64d,1.0/64d,1.0/64d);
+//        Vector3 scaleFromResolution = new Vector3(1.0/64d,1.0/64d,1.0/64d);
         
         //4. Höhenwerte bereitstellen durch einlesen
         BufferedImage heightmapFile = ImageIO.read(new File(heightmapPath));

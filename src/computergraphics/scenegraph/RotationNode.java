@@ -10,6 +10,7 @@ package computergraphics.scenegraph;
 
 import javax.media.opengl.GL2;
 
+import computergraphics.math.Matrix3;
 import computergraphics.math.Vector3;
 
 /**
@@ -20,6 +21,8 @@ public class RotationNode extends Node {
 	
 	private final Vector3 rotAxis;
 	private final float angle;
+	
+	private Matrix3 matrix;
 	
 	/**
 	 * Constructor.
@@ -41,12 +44,21 @@ public class RotationNode extends Node {
 	public void drawGl(GL2 gl) {
 		
 		// Remember current state of the render system
-				gl.glPushMatrix();
+	    gl.glPushMatrix();
 
+	    /*
 		// cast von double auf float, um openGL-Funktion verwenden zu k�nnen. 
 		//TODO entscheiden ob glRotatef oder glRotated
 		gl.glRotatef(angle, (float) rotAxis.get(0), (float) rotAxis.get(1), (float) rotAxis.get(2));		
-		
+		*/
+	    double[] fourXfourMatrix = new double[] {
+	            matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2), 0,
+	            matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2), 0,
+	            matrix.get(2, 0), matrix.get(2, 1), matrix.get(2, 2), 0,
+	            0, 0, 0, 1
+	    };
+	    gl.glMultMatrixd(fourXfourMatrix, 0);
+	    
 		// Draw all children
 		for (int childIndex = 0; childIndex < getNumberOfChildren(); 
 				childIndex++) {
@@ -57,6 +69,11 @@ public class RotationNode extends Node {
 		gl.glPopMatrix();
 		
 	}
+
+
+    public void setMatrix(Matrix3 matrix) {
+        this.matrix = matrix;
+    }
 	
 	
 
