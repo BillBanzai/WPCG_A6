@@ -22,7 +22,7 @@ import computergraphics.math.Vector3;
 public class MovableObject extends Node {
     
     /*"Darin wird der Wert von α um einen festen Wert erhöht (z.B. 0.05)"*/
-    private static final double INTERPOLATION_INCREMENT = 0.0005;
+    private static final double INTERPOLATION_INCREMENT = 0.005;
 
     private static final Vector3 UP_VECTOR = new Vector3(0,1,0);
 
@@ -104,8 +104,11 @@ public class MovableObject extends Node {
         //2.Berechnete position im Translationsknoten setzen
         translationNode.setFactor(positionNow);
         
-        //3.Alpha erhöhen
-        alpha += INTERPOLATION_INCREMENT;
+//        //3.Alpha erhöhen (Konstante Schrittweite)
+//        alpha += (INTERPOLATION_INCREMENT);
+        // 3. Alpha erhöhen (Konstante Geschwindigkeit)
+        Vector3 directionVector = p0.subtract(p1);
+        alpha += INTERPOLATION_INCREMENT*(1/directionVector.getNorm());
         
         /* Bei Bedarf alpha zurück auf 0 setzen und dann auch vordersten
          * Wegpunkt ans Ende der Liste setzen. */

@@ -155,6 +155,6 @@ public class CGFrame extends AbstractCGFrame {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		new CGFrame(5);
+		new CGFrame(30);
 	}
 }
