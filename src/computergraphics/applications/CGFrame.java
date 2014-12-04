@@ -127,7 +127,7 @@ public class CGFrame extends AbstractCGFrame {
         TriangleMeshNode ballNode = new TriangleMeshNode(ball);
         
         //2b. Skalierung der kugel von ScaleNode
-        Vector3 scaleFromResolution = new Vector3(3.0/64d,1.0/64d,1.0/64d);
+        Vector3 scaleFromResolution = new Vector3(3.0/256d,1.0/256d,1.0/256d);
 //        Vector3 scaleFromResolution = new Vector3(1.0/64d,1.0/64d,1.0/64d);
         
         //4. Höhenwerte bereitstellen durch einlesen
@@ -155,6 +155,6 @@ public class CGFrame extends AbstractCGFrame {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		new CGFrame(30);
+		new CGFrame(50);
 	}
 }
