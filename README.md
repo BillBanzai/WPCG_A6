@@ -1,4 +1,4 @@
-WPCG_A5
+WPCG_A6
 =======
 
-Computergraphik Aufgabenblatt 5 
+Computergraphik Aufgabenblatt 6, basierend auf aufgabe 5
