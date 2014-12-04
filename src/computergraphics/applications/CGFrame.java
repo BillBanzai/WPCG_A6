@@ -37,8 +37,8 @@ public class CGFrame extends AbstractCGFrame {
 	 */
 	private static final long serialVersionUID = 4257130065274995543L;
 	/* "[...] beispielsweise weiß entspricht einem y‐Wert von 0.1."*/
-	private static final double MAX_HEIGHT = 0.3;
-	private static final int DEFAULT_RESOLUTION = 800; //8x8
+	private static final double MAX_HEIGHT = 0.05;
+	private static final int DEFAULT_RESOLUTION = 1006; //8x8
 	
     
     //3. Die wegpunkte für die kugel erzeugen
@@ -85,8 +85,8 @@ public class CGFrame extends AbstractCGFrame {
 	 */
 	public CGFrame(int timerInverval) throws IOException {
 		super(timerInverval);
-		String colorPath = "img/color.png";
-		String heightmapPath = "img/heightField.png";
+		String colorPath = "img/karte_deutschland.jpg";
+		String heightmapPath = "img/hoehenkarte_deutschland.png";
 		
 		
 		//heightfield: aus bild
