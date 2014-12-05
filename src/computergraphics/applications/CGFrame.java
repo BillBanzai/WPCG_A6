@@ -116,15 +116,15 @@ public class CGFrame extends AbstractCGFrame {
     private MovableObject makeMoveableObject(String heightmapPath,
             double maxHeight, List<Vector3> wegpunkt) throws IOException {
         //1. Die kugel erzeugen 
-        ITriangleMesh ball = new TriangleMesh();
+        ITriangleMesh cube = new TriangleMesh();
         
         ObjIO objIO = new ObjIO();
-        objIO.einlesen("meshes/sphere.obj", ball);
+        objIO.einlesen("meshes/cube.obj", cube);
         
-        ((TriangleMesh)ball).calculateAllNormals();
+        ((TriangleMesh)cube).calculateAllNormals();
         
         //2a. Kugel in ein TriangleMeshNode stecken
-        TriangleMeshNode ballNode = new TriangleMeshNode(ball);
+        TriangleMeshNode ballNode = new TriangleMeshNode(cube);
         
         //2b. Skalierung der kugel von ScaleNode
         Vector3 scaleFromResolution = new Vector3(3.0/256d,1.0/256d,1.0/256d);
