@@ -17,7 +17,10 @@ import computergraphics.datastructures.ITriangleMesh;
 import computergraphics.datastructures.ObjIO;
 import computergraphics.datastructures.TriangleMesh;
 import computergraphics.framework.AbstractCGFrame;
-import computergraphics.framework.Shaders;
+import computergraphics.hlsvis.hls.Connections;
+import computergraphics.hlsvis.hls.HlsConstants;
+import computergraphics.hlsvis.hls.TransportNetwork;
+import computergraphics.hlsvis.rabbitmq.RabbitMqCommunication;
 import computergraphics.math.Vector3;
 import computergraphics.scenegraph.ColorNode;
 import computergraphics.scenegraph.TranslationNode;
@@ -86,6 +89,9 @@ public class CGFrame extends AbstractCGFrame {
 	 */
 	public CGFrame(int timerInverval) throws IOException {
 		super(timerInverval);
+		
+		sendTransportationLanes();
+		
 		String colorPath = "img/karte_deutschland.jpg";
 		String heightmapPath = "img/hoehenkarte_deutschland.png";
 		
@@ -101,8 +107,7 @@ public class CGFrame extends AbstractCGFrame {
 		
 		// Colornode erstellen für farbliche Darstellung
 		ColorNode colorNode = new ColorNode(new Vector3(0, 0.5, 0));
-		ColorNode colorNodeMob = new ColorNode(new Vector3(1, 1, 1),
-				Shaders.Vertex.TEXTURE_SHADER,Shaders.Fragment.TEXTURE_SHADER);
+		ColorNode colorNodeMob = new ColorNode(new Vector3(1, 1, 1));
 		
 		movableObject1 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Rand);
 		movableObject2 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Pfad);
@@ -117,6 +122,19 @@ public class CGFrame extends AbstractCGFrame {
 		colorNodeMob.addChild(movableObject3);
 	}
 	
+    private void sendTransportationLanes() {
+        /* "Die Transportbeziehungen sind die Kanten im Graph." */
+        Connections transportationLanes = new Connections();
+        transportationLanes.initWithAllConnections();
+        RabbitMqCommunication queue = new RabbitMqCommunication(
+                HlsConstants.TRANSPORZBEZIEHUNGEN_QUEUE,
+                "localhost", "guest", "guest");
+        queue.connect();
+        /* "Senden Sie bei Programmstart die Transportbeziehungen an die 
+         * richtige RabbitMQ‐Queue."*/
+        queue.sendMessage(transportationLanes.toJson());
+    }
+
     private MovableObject makeMoveableObject(String heightmapPath,
             double maxHeight, List<Vector3> wegpunkt) throws IOException {
         //1. Die kugel erzeugen 
