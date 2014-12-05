@@ -30,6 +30,14 @@ public class ColorNode extends Node {
 				"shader/fragment_shader_phong_shading.glsl");
 	}
 
+	public ColorNode(Vector3 color, String vertexShaderPath,
+			String fragmentShaderPath) {
+		this.color.copy(color);
+		
+		//use some shader
+		shader = new CgGlslShader(vertexShaderPath,fragmentShaderPath);
+	}
+
 	@Override
 	public void drawGl(GL2 gl) {
 

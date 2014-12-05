@@ -17,6 +17,7 @@ import computergraphics.datastructures.ITriangleMesh;
 import computergraphics.datastructures.ObjIO;
 import computergraphics.datastructures.TriangleMesh;
 import computergraphics.framework.AbstractCGFrame;
+import computergraphics.framework.Shaders;
 import computergraphics.math.Vector3;
 import computergraphics.scenegraph.ColorNode;
 import computergraphics.scenegraph.TranslationNode;
@@ -100,6 +101,8 @@ public class CGFrame extends AbstractCGFrame {
 		
 		// Colornode erstellen für farbliche Darstellung
 		ColorNode colorNode = new ColorNode(new Vector3(0, 0.5, 0));
+		ColorNode colorNodeMob = new ColorNode(new Vector3(1, 1, 1),
+				Shaders.Vertex.TEXTURE_SHADER,Shaders.Fragment.TEXTURE_SHADER);
 		
 		movableObject1 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Rand);
 		movableObject2 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Pfad);
@@ -107,10 +110,11 @@ public class CGFrame extends AbstractCGFrame {
 		
 		getRoot().addChild(translationNode);
 		translationNode.addChild(colorNode);
+		translationNode.addChild(colorNodeMob);
 		colorNode.addChild(heightfieldNode);
-		colorNode.addChild(movableObject1);
-		colorNode.addChild(movableObject2);
-		colorNode.addChild(movableObject3);
+		colorNodeMob.addChild(movableObject1);
+		colorNodeMob.addChild(movableObject2);
+		colorNodeMob.addChild(movableObject3);
 	}
 	
     private MovableObject makeMoveableObject(String heightmapPath,
@@ -127,8 +131,8 @@ public class CGFrame extends AbstractCGFrame {
         TriangleMeshNode ballNode = new TriangleMeshNode(cube);
         
         //2b. Skalierung der kugel von ScaleNode
-        Vector3 scaleFromResolution = new Vector3(3.0/256d,1.0/256d,1.0/256d);
-//        Vector3 scaleFromResolution = new Vector3(1.0/64d,1.0/64d,1.0/64d);
+//        Vector3 scaleFromResolution = new Vector3(3.0/256d,1.0/256d,1.0/256d);
+        Vector3 scaleFromResolution = new Vector3(1.0/64d,1.0/64d,1.0/64d);
         
         //4. Höhenwerte bereitstellen durch einlesen
         BufferedImage heightmapFile = ImageIO.read(new File(heightmapPath));
