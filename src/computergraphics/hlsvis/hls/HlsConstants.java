@@ -29,7 +29,8 @@ public interface HlsConstants {
 	/**
 	 * Queue names: 'Transportbeziehungen'
 	 */
-	public static final String TRANSPORZBEZIEHUNGEN_QUEUE = "TRANSPORZBEZIEHUNGEN_QUEUE";
+	public static final String TRANSPORZBEZIEHUNGEN_QUEUE = 
+	        "HLS.Queue.Transportbeziehungen.CGTeam14";
 
 	/**
 	 * Number of minutes each visualizaition tick represents

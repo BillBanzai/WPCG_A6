@@ -23,6 +23,7 @@ import computergraphics.hlsvis.hls.TransportNetwork;
 import computergraphics.hlsvis.rabbitmq.RabbitMqCommunication;
 import computergraphics.math.Vector3;
 import computergraphics.scenegraph.ColorNode;
+import computergraphics.scenegraph.GroupNode;
 import computergraphics.scenegraph.TranslationNode;
 import computergraphics.scenegraph.TriangleMeshNode;
 import computergraphics.util.Heightfield;
@@ -102,24 +103,36 @@ public class CGFrame extends AbstractCGFrame {
 		
 		TriangleMeshNode heightfieldNode = new TriangleMeshNode(heightfield); 
 		
-		TranslationNode translationNode = 
+		TranslationNode translationNodeTerrain = 
 		        new TranslationNode(new Vector3(-0.5,0,-0.5));
-		
+		TranslationNode translationNodeMobs = 
+		        new TranslationNode(new Vector3(-0.5,0,-0.5));
+		GroupNode groupTerrain = new GroupNode();
+		GroupNode groupMobs = new GroupNode();
 		// Colornode erstellen für farbliche Darstellung
-		ColorNode colorNode = new ColorNode(new Vector3(0, 0.5, 0));
-		ColorNode colorNodeMob = new ColorNode(new Vector3(1, 1, 1));
+		ColorNode colorNode = new ColorNode(new Vector3(0, 0.5, 0),
+		        "shader/vertex_shader_phong_shading.glsl",
+		        "shader/fragment_shader_phong_shading.glsl");
+		ColorNode colorNodeMob = new ColorNode(new Vector3(0.5,0.5,0.5),
+		        "shader/vertex_shader_texture.glsl",
+                "shader/fragment_shader_texture.glsl");
 		
 		movableObject1 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Rand);
 		movableObject2 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Pfad);
 		movableObject3 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Berge);
 		
-		getRoot().addChild(translationNode);
-		translationNode.addChild(colorNode);
-		translationNode.addChild(colorNodeMob);
-		colorNode.addChild(heightfieldNode);
-		colorNodeMob.addChild(movableObject1);
-		colorNodeMob.addChild(movableObject2);
-		colorNodeMob.addChild(movableObject3);
+		getRoot().addChild(groupTerrain);
+		groupTerrain.addChild(colorNode);
+		colorNode.addChild(translationNodeTerrain);
+		translationNodeTerrain.addChild(heightfieldNode);
+		
+		getRoot().addChild(groupMobs);
+		groupMobs.addChild(colorNodeMob);
+		colorNodeMob.addChild(translationNodeMobs);
+		translationNodeMobs.addChild(movableObject1);
+		translationNodeMobs.addChild(movableObject2);
+		translationNodeMobs.addChild(movableObject3);
+	      
 	}
 	
     private void sendTransportationLanes() {
