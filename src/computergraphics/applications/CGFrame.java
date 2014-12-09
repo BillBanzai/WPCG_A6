@@ -23,6 +23,7 @@ import computergraphics.hlsvis.rabbitmq.RabbitMqCommunication;
 import computergraphics.math.Vector3;
 import computergraphics.scenegraph.ColorNode;
 import computergraphics.scenegraph.GroupNode;
+import computergraphics.scenegraph.RotationNode;
 import computergraphics.scenegraph.TranslationNode;
 import computergraphics.scenegraph.TriangleMeshNode;
 import computergraphics.scenegraph.TriangleMeshNodeTexture;
@@ -43,6 +44,8 @@ public class CGFrame extends AbstractCGFrame {
 	private static final long serialVersionUID = 4257130065274995543L;
 	/* "[...] beispielsweise weiß entspricht einem y‐Wert von 0.1."*/
 	private static final double MAX_HEIGHT = 0.05;
+	private static final String CUBE_PATH = "meshes/cube.obj";
+	private static final String PLANE_PATH = "meshes/mesh_airplane_blue/airplane_blue_mesh.obj";
 	private static final int DEFAULT_RESOLUTION = 1006; //8x8
 	
     
@@ -107,6 +110,7 @@ public class CGFrame extends AbstractCGFrame {
 		        new TranslationNode(new Vector3(-0.5,0,-0.5));
 		TranslationNode translationNodeMobs = 
 		        new TranslationNode(new Vector3(-0.5,0,-0.5));
+		RotationNode rotate = new RotationNode(new Vector3(0,0,1.0), 90 );
 		GroupNode groupTerrain = new GroupNode();
 		GroupNode groupMobs = new GroupNode();
 		// Colornode erstellen für farbliche Darstellung
@@ -117,9 +121,12 @@ public class CGFrame extends AbstractCGFrame {
 		        "shader/vertex_shader_texture.glsl",
                 "shader/fragment_shader_texture.glsl");
 		
-		movableObject1 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Rand);
-		movableObject2 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Pfad);
-		movableObject3 = makeMoveableObject(heightmapPath,MAX_HEIGHT, waypoints_Berge);
+		movableObject1 = makeMoveableObject(heightmapPath,MAX_HEIGHT, 
+				waypoints_Rand, CUBE_PATH);
+		movableObject2 = makeMoveableObject(heightmapPath,MAX_HEIGHT, 
+				waypoints_Pfad, PLANE_PATH);
+		movableObject3 = makeMoveableObject(heightmapPath,MAX_HEIGHT, 
+				waypoints_Berge, CUBE_PATH);
 		
 		getRoot().addChild(groupTerrain);
 		groupTerrain.addChild(colorNode);
@@ -132,6 +139,7 @@ public class CGFrame extends AbstractCGFrame {
 		translationNodeMobs.addChild(movableObject1);
 		translationNodeMobs.addChild(movableObject2);
 		translationNodeMobs.addChild(movableObject3);
+		movableObject2.addChild(rotate);
 	      
 	}
 	
@@ -149,17 +157,17 @@ public class CGFrame extends AbstractCGFrame {
     }
 
     private MovableObject makeMoveableObject(String heightmapPath,
-            double maxHeight, List<Vector3> wegpunkt) throws IOException {
-        //1. Die kugel erzeugen 
-        ITriangleMesh cube = new TriangleMesh();
+            double maxHeight, List<Vector3> wegpunkt, String objPath) throws IOException {
+        //1. Das Object erzeugen 
+        ITriangleMesh mObject = new TriangleMesh();
         
         ObjIO objIO = new ObjIO();
-        objIO.einlesen("meshes/cube.obj", cube);
+        objIO.einlesen(objPath, mObject);
         
-        ((TriangleMesh)cube).calculateAllNormals();
+        ((TriangleMesh)mObject).calculateAllNormals();
         
         //2a. Kugel in ein TriangleMeshNode stecken
-        TriangleMeshNodeTexture ballNode = new TriangleMeshNodeTexture(cube);
+        TriangleMeshNodeTexture mObjectNode = new TriangleMeshNodeTexture(mObject);
         
         //2b. Skalierung der kugel von ScaleNode
 //        Vector3 scaleFromResolution = new Vector3(3.0/256d,1.0/256d,1.0/256d);
@@ -169,7 +177,7 @@ public class CGFrame extends AbstractCGFrame {
         BufferedImage heightmapFile = ImageIO.read(new File(heightmapPath));
         
         // 3 MoveableObject erzeugen mit einem der 3 obigen Pfaden
-        return new MovableObject(ballNode, scaleFromResolution ,
+        return new MovableObject(mObjectNode, scaleFromResolution ,
                 new Vector3(0,0,0), 0.0f, wegpunkt,heightmapFile, maxHeight);
     }
 
