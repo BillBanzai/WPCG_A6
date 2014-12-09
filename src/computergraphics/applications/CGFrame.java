@@ -19,13 +19,13 @@ import computergraphics.datastructures.TriangleMesh;
 import computergraphics.framework.AbstractCGFrame;
 import computergraphics.hlsvis.hls.Connections;
 import computergraphics.hlsvis.hls.HlsConstants;
-import computergraphics.hlsvis.hls.TransportNetwork;
 import computergraphics.hlsvis.rabbitmq.RabbitMqCommunication;
 import computergraphics.math.Vector3;
 import computergraphics.scenegraph.ColorNode;
 import computergraphics.scenegraph.GroupNode;
 import computergraphics.scenegraph.TranslationNode;
 import computergraphics.scenegraph.TriangleMeshNode;
+import computergraphics.scenegraph.TriangleMeshNodeTexture;
 import computergraphics.util.Heightfield;
 import computergraphics.scenegraph.MovableObject;
 
@@ -159,7 +159,7 @@ public class CGFrame extends AbstractCGFrame {
         ((TriangleMesh)cube).calculateAllNormals();
         
         //2a. Kugel in ein TriangleMeshNode stecken
-        TriangleMeshNode ballNode = new TriangleMeshNode(cube);
+        TriangleMeshNodeTexture ballNode = new TriangleMeshNodeTexture(cube);
         
         //2b. Skalierung der kugel von ScaleNode
 //        Vector3 scaleFromResolution = new Vector3(3.0/256d,1.0/256d,1.0/256d);
