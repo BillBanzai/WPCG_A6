@@ -11,30 +11,14 @@ package computergraphics.scenegraph;
 import javax.media.opengl.GL2;
 
 import computergraphics.math.Matrix3;
-import computergraphics.math.Vector3;
 
 /**
  * Diese Klasse erm�glicht es, Rotationen darzustellen.
  *
  */
-public class RotationNode extends Node {
-	
-	private final Vector3 rotAxis;
-	private final float angle;
+public class RotationNodeMatrix extends Node {
 	
 	private Matrix3 matrix;
-	
-	/**
-	 * Constructor.
-	 * @param rotAxis Die Rotationsachse, um die gedreht werden soll
-	 * @param angle Der Winkel im Bogenma� um wie viel gegen den Uhrzeigersinn
-	 * 				rotiert werden soll.
-	 */
-	public RotationNode(Vector3 rotAxis, float angle) {
-		this.rotAxis = rotAxis;
-		this.angle = angle;
-	}
-	
 
 	/**
 	 * Sorgt daf�r, dass alle Kindknoten dieses Knotens relativ zu einer 
@@ -45,12 +29,7 @@ public class RotationNode extends Node {
 		
 		// Remember current state of the render system
 	    gl.glPushMatrix();
-
-	    /*
-		// cast von double auf float, um openGL-Funktion verwenden zu k�nnen. 
-		//TODO entscheiden ob glRotatef oder glRotated
-		gl.glRotatef(angle, (float) rotAxis.get(0), (float) rotAxis.get(1), (float) rotAxis.get(2));		
-		*/
+	    
 	    double[] fourXfourMatrix = new double[] {
 	            matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2), 0,
 	            matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2), 0,
@@ -74,7 +53,4 @@ public class RotationNode extends Node {
     public void setMatrix(Matrix3 matrix) {
         this.matrix = matrix;
     }
-	
-	
-
 }

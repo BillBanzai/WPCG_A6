@@ -23,7 +23,7 @@ import computergraphics.hlsvis.rabbitmq.RabbitMqCommunication;
 import computergraphics.math.Vector3;
 import computergraphics.scenegraph.ColorNode;
 import computergraphics.scenegraph.GroupNode;
-import computergraphics.scenegraph.RotationNode;
+import computergraphics.scenegraph.RotationNodeMatrix;
 import computergraphics.scenegraph.ScaleNode;
 import computergraphics.scenegraph.TranslationNode;
 import computergraphics.scenegraph.TriangleMeshNode;
@@ -176,8 +176,9 @@ public class CGFrame extends AbstractCGFrame {
         BufferedImage heightmapFile = ImageIO.read(new File(heightmapPath));
         
         // 3 MoveableObject erzeugen mit einem der 3 obigen Pfaden
+        // Da das Flugzeug-Model falsch orientiert ist, muss es einmal um 90° gedreht werden
         return new MovableObject(mObjectNode, scale ,
-                new Vector3(0,0,0), 0.0f, wegpunkt,heightmapFile, maxHeight);
+                new Vector3(0,1,0), 90.0f, wegpunkt,heightmapFile, maxHeight);
     }
 
     /*

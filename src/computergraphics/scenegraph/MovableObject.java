@@ -36,11 +36,14 @@ public class MovableObject extends Node {
         scaleNode = new ScaleNode(scale);
         scaleNode.addChild(this.geometryNode);
         
-        rotationNode = new RotationNode(rotAxis, rotAngle);
-        rotationNode.addChild(scaleNode);
+        rotationNodeMatrix = new RotationNodeMatrix();
+        rotationNodeAngle = new RotationNodeAngle(rotAxis, rotAngle);
+        rotationNodeAngle.addChild(scaleNode);
         
         translationNode = new TranslationNode(new Vector3(0,0,0));
-        translationNode.addChild(rotationNode);
+        rotationNodeMatrix.addChild(rotationNodeAngle);
+        translationNode.addChild(rotationNodeMatrix);
+
         
         addChild(translationNode);
         
@@ -56,7 +59,8 @@ public class MovableObject extends Node {
     private ScaleNode scaleNode;
     
     /** "Darüber hat er einen Rotationsknoten." */
-    private RotationNode rotationNode;
+    private RotationNodeMatrix rotationNodeMatrix;
+    private RotationNodeAngle rotationNodeAngle;
     
     /** "An oberster Stelle wird ein Translationsknoten benötigt." */
     private TranslationNode translationNode;
@@ -136,7 +140,7 @@ public class MovableObject extends Node {
         
         Matrix3 coordinateSystem = new Matrix3(x, y, z);
         
-        rotationNode.setMatrix(coordinateSystem);
+        rotationNodeMatrix.setMatrix(coordinateSystem);
     }
 
     private double getHeight(double x, double z) {
