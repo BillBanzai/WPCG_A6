@@ -157,7 +157,7 @@ public class MovableObject extends Node {
          
          return heightValue;
     }
-
+    
     @Override
     public void drawGl(GL2 gl) {
         translationNode.drawGl(gl);

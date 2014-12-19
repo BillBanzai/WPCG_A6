@@ -23,8 +23,6 @@ import computergraphics.hlsvis.rabbitmq.RabbitMqCommunication;
 import computergraphics.math.Vector3;
 import computergraphics.scenegraph.ColorNode;
 import computergraphics.scenegraph.GroupNode;
-import computergraphics.scenegraph.RotationNodeMatrix;
-import computergraphics.scenegraph.ScaleNode;
 import computergraphics.scenegraph.TranslationNode;
 import computergraphics.scenegraph.TriangleMeshNode;
 import computergraphics.scenegraph.TriangleMeshNodeTexture;
@@ -50,7 +48,6 @@ public class CGFrame extends AbstractCGFrame {
 	private static final Vector3 SCALE_FROM_RESOLUTION = new Vector3(1.0/64d,1.0/64d,1.0/64d);
 	private static final Vector3 PLANE_SCALE = new Vector3(1.0/128d,1.0/128d,1.0/128d);
 	private static final int DEFAULT_RESOLUTION = 1006; //8x8
-	
     
     //3. Die wegpunkte für die kugel erzeugen
     // Im uhrzeigersinn 
@@ -115,10 +112,11 @@ public class CGFrame extends AbstractCGFrame {
 		        new TranslationNode(new Vector3(-0.5,0,-0.5));
 		GroupNode groupTerrain = new GroupNode();
 		GroupNode groupMobs = new GroupNode();
-		// Colornode erstellen für farbliche Darstellung
+		// Colornode erstellen für farbliche Darstellung für das Höhenfeld...
 		ColorNode colorNode = new ColorNode(new Vector3(0, 0.5, 0),
 		        "shader/vertex_shader_phong_shading.glsl",
 		        "shader/fragment_shader_phong_shading.glsl");
+		// ... für die movable objects.
 		ColorNode colorNodeMob = new ColorNode(new Vector3(0.5,0.5,0.5),
 		        "shader/vertex_shader_texture.glsl",
                 "shader/fragment_shader_texture.glsl");
@@ -130,11 +128,13 @@ public class CGFrame extends AbstractCGFrame {
 		movableObject3 = makeMoveableObject(heightmapPath,MAX_HEIGHT, 
 				waypoints_Berge, CUBE_PATH, SCALE_FROM_RESOLUTION);
 		
+		// Höhenfeld Knoten zusammenfügen
 		getRoot().addChild(groupTerrain);
 		groupTerrain.addChild(colorNode);
 		colorNode.addChild(translationNodeTerrain);
 		translationNodeTerrain.addChild(heightfieldNode);
 		
+		// Moveable Objects Knoten zusammenbauen
 		getRoot().addChild(groupMobs);
 		groupMobs.addChild(colorNodeMob);
 		colorNodeMob.addChild(translationNodeMobs);
@@ -177,8 +177,11 @@ public class CGFrame extends AbstractCGFrame {
         
         // 3 MoveableObject erzeugen mit einem der 3 obigen Pfaden
         // Da das Flugzeug-Model falsch orientiert ist, muss es einmal um 90° gedreht werden
+        float rotAngle = 90.0f;
+        Vector3 rotAxis = new Vector3(0,1,0);
+        
         return new MovableObject(mObjectNode, scale ,
-                new Vector3(0,1,0), 90.0f, wegpunkt,heightmapFile, maxHeight);
+                rotAxis, rotAngle, wegpunkt,heightmapFile, maxHeight);
     }
 
     /*
