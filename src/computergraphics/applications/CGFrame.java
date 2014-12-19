@@ -8,7 +8,10 @@ package computergraphics.applications;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -19,6 +22,8 @@ import computergraphics.datastructures.TriangleMesh;
 import computergraphics.framework.AbstractCGFrame;
 import computergraphics.hlsvis.hls.Connections;
 import computergraphics.hlsvis.hls.HlsConstants;
+import computergraphics.hlsvis.hls.TransportOrder;
+import computergraphics.hlsvis.rabbitmq.IMessageCallback;
 import computergraphics.hlsvis.rabbitmq.RabbitMqCommunication;
 import computergraphics.math.Vector3;
 import computergraphics.scenegraph.ColorNode;
@@ -86,13 +91,18 @@ public class CGFrame extends AbstractCGFrame {
 	private MovableObject movableObject1;
 	private MovableObject movableObject2;
 	private MovableObject movableObject3;
+    private RabbitMqCommunication mqComm;
+    private Date currentTime;
 
 	/**
 	 * Constructor.
 	 * @throws IOException 
+	 * @throws ParseException 
 	 */
-	public CGFrame(int timerInverval) throws IOException {
+	public CGFrame(int timerInverval) throws IOException, ParseException {
 		super(timerInverval);
+		
+		currentTime = parseDate("2014‐12­‐08 00:00:00");
 		
 		sendTransportationLanes();
 		
@@ -141,19 +151,53 @@ public class CGFrame extends AbstractCGFrame {
 		translationNodeMobs.addChild(movableObject1);
 		translationNodeMobs.addChild(movableObject2);
 		translationNodeMobs.addChild(movableObject3);
-	      
+	    
+		registerForFreightContracts();
 	}
+    private Date parseDate(String string) throws ParseException {
+        /* Erst das zu dem string "2014‐12­‐08 00:00:00" passende datumsformat
+           erstellen */
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return format.parse(string);
+    }
+    private void registerForFreightContracts() {
+        IMessageCallback receiver = new IMessageCallback() {
+            
+            @Override
+            public void messageReceived(String message) {
+                // TransportOrder erstellen
+                TransportOrder order = new TransportOrder();
+                // mit daten aus der JSON-Nachricht befüllen
+                order.fromJson(message);
+                /* "Wenn sie einen Frachtauftrag erhalten, prüfen sie zunächst,
+                 *  prüfen sie zunächst, ob der Startzeitpunkt in der Zukunft 
+                 *  liegt.  */
+                Date startTime = order.getStartTime();
+                if (startTime.after(currentTime)) {
+                    // "Ansonsten merken sie sich den Auftrag." 
+                    rememberOrder(order);
+                }
+                // "Falls nicht, verwerfen sie den Auftrag."
+            }
+
+            private void rememberOrder(TransportOrder order) {
+                // TODO Auto-generated method stub
+                
+            }
+        };
+        mqComm.registerMessageReceiver(receiver);
+    }
     private void sendTransportationLanes() {
         /* "Die Transportbeziehungen sind die Kanten im Graph." */
         Connections transportationLanes = new Connections();
         transportationLanes.initWithAllConnections();
-        RabbitMqCommunication queue = new RabbitMqCommunication(
+        mqComm = new RabbitMqCommunication(
                 HlsConstants.TRANSPORZBEZIEHUNGEN_QUEUE,
                 "localhost", "guest", "guest");
-        queue.connect();
+        mqComm.connect();
         /* "Senden Sie bei Programmstart die Transportbeziehungen an die 
          * richtige RabbitMQ‐Queue."*/
-        queue.sendMessage(transportationLanes.toJson());
+        mqComm.sendMessage(transportationLanes.toJson());
     }
 
     private MovableObject makeMoveableObject(String heightmapPath,
@@ -199,8 +243,9 @@ public class CGFrame extends AbstractCGFrame {
 	/**
 	 * Program entry point.
 	 * @throws IOException 
+	 * @throws ParseException 
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, ParseException {
 		new CGFrame(50);
 	}
 }
