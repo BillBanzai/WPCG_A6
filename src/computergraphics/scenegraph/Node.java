@@ -49,5 +49,9 @@ public abstract class Node {
 	 * children.
 	 */
 	public abstract void drawGl(GL2 gl);
+	
+	public void removeChild(Node child) {
+		children.remove(child);
+	}
 
 }

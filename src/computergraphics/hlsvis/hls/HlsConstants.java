@@ -19,18 +19,23 @@ public interface HlsConstants {
 	/**
 	 * Queue names: 'Frachtaufräge'
 	 */
-	public static final String FRACHTAUFTRAG_QUEUE = "FRACHTAUFTRAG_QUEUE";
+	public static final String FRACHTAUFTRAG_QUEUE = 
+			"HLS.Queue.Frachtauftrag.CGTeam14";
+	//HLS.Queue.Frachtauftrag.SwPTeam5.CGTeam14
 
 	/**
 	 * Queue names: 'Sendungsereignisse'
 	 */
-	public static final String SENDUNGSEREIGNIS_QUEUE = "SENDUNGSEREIGNIS_QUEUE";
+	public static final String SENDUNGSEREIGNIS_QUEUE = 
+			"HLS.Queue.Sendungsereignis.CGTeam14";
+	//HLS.Queue.Sendungsereignis.SwPTeam5.CGTeam14
 
 	/**
 	 * Queue names: 'Transportbeziehungen'
 	 */
 	public static final String TRANSPORZBEZIEHUNGEN_QUEUE = 
 	        "HLS.Queue.Transportbeziehungen.CGTeam14";
+	//HLS.Queue.Transportbeziehungen.SwPTeam5.CGTeam14
 
 	/**
 	 * Number of minutes each visualizaition tick represents

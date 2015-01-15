@@ -28,10 +28,12 @@ public class MovableObject extends Node {
 
     public MovableObject(Node geometryNode,Vector3 scale, Vector3 rotAxis, 
             float rotAngle, List<Vector3> waypoints,BufferedImage terrainFile,
-            double maxHeight) {
+            double maxHeight, Node parentNode) {
         /* Den Objektgraphen aus geometryNode, scaleNode, rotationNode, 
            translationNode und this zusammenbauen */
         this.geometryNode = geometryNode;
+        this.parentNode = parentNode;
+        
         
         scaleNode = new ScaleNode(scale);
         scaleNode.addChild(this.geometryNode);
@@ -51,6 +53,9 @@ public class MovableObject extends Node {
         this.terrainFile = terrainFile;
         this.maxHeight = maxHeight;
     }
+    /** Elternknoten **/
+    private Node parentNode;
+    
     /** "Er beinhaltet auf unterster Ebene die Geometrie des Objektes." */
     private Node geometryNode; //TriangleMeshNode,SingleTriangleNode,etc.
     
@@ -114,18 +119,22 @@ public class MovableObject extends Node {
         Vector3 directionVector = p0.subtract(p1);
         alpha += INTERPOLATION_INCREMENT*(1/directionVector.getNorm());
         
-        /* Bei Bedarf alpha zurück auf 0 setzen und dann auch vordersten
-         * Wegpunkt ans Ende der Liste setzen. */
+        /* Wenn wir fertig sind, alpha zurück auf 0 setzen und 
+         * knoten aus dem graphen entfernen */
         if(alpha > 1.0) {
             alpha = 0;
-            waypoints.add(waypoints.remove(0));
+            detachSelf();
         }
         
         //4. Entlang aktueller bewegungsrichtung ausrichten
         alignToMovement(p0,p1);
     }
 
-    private void alignToMovement(Vector3 p0, Vector3 p1) {
+    private void detachSelf() {
+		parentNode.removeChild(this);
+	}
+
+	private void alignToMovement(Vector3 p0, Vector3 p1) {
         /* "Der x-Vektor des Koordinatensystems ist der Vektor von der ersten 
          * zur Zweitenwegmarke (also p1-p0)." */
         Vector3 x = p1.subtract(p0);
