@@ -102,7 +102,7 @@ public class CGFrame extends AbstractCGFrame {
 	public CGFrame(int timerInverval) throws IOException, ParseException {
 		super(timerInverval);
 		
-		currentTime = parseDate("2014‐12­‐08 00:00:00");
+		currentTime = parseDate("2014-12-08 00:00:00");
 		
 		sendTransportationLanes();
 		
@@ -155,7 +155,7 @@ public class CGFrame extends AbstractCGFrame {
 		registerForFreightContracts();
 	}
     private Date parseDate(String string) throws ParseException {
-        /* Erst das zu dem string "2014‐12­‐08 00:00:00" passende datumsformat
+        /* Erst das zu dem string "2014‐12‐08 00:00:00" passende datumsformat
            erstellen */
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return format.parse(string);
