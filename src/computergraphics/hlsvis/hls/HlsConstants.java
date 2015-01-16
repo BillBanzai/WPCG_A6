@@ -54,7 +54,10 @@ public interface HlsConstants {
 	
 	
 	public static final String MQ_PASSWORD = "Rwj9joAi";
+	// public static final String MQ_PASSWORD = "guest";
 	public static final String MQ_USERNAME = "CGTeams";
+	// public static final String MQ_USERNAME = "guest";
 	public static final String MQ_SERVER_URL = "win-devel.informatik.haw-hamburg.de";
+	// public static final String MQ_SERVER_URL = "localhost";
 
 }
