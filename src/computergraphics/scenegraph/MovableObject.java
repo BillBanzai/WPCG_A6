@@ -127,19 +127,11 @@ public class MovableObject extends Node {
         // 3. Alpha erhöhen (Konstante Geschwindigkeit)
         Vector3 directionVector = p0.subtract(p1);
         
-        /* Wenn wir fertig sind, alpha zurück auf 0 setzen und 
-         * knoten aus dem graphen entfernen */
-        if(alpha > 1.0) {
-            detachSelf();
-        }
         
         //4. Entlang aktueller bewegungsrichtung ausrichten
         alignToMovement(p0,p1);
     }
 
-    private void detachSelf() {
-		parentNode.removeChild(this);
-	}
 
 	private void alignToMovement(Vector3 p0, Vector3 p1) {
         /* "Der x-Vektor des Koordinatensystems ist der Vektor von der ersten 

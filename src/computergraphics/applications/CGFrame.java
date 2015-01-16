@@ -11,11 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -36,6 +34,7 @@ import computergraphics.hlsvis.hls.HlsSimulator;
 import computergraphics.hlsvis.hls.TransportEvent;
 import computergraphics.hlsvis.hls.TransportNetwork;
 import computergraphics.hlsvis.hls.TransportOrder;
+import computergraphics.hlsvis.hls.TransportEvent.EventType;
 import computergraphics.hlsvis.rabbitmq.IMessageCallback;
 import computergraphics.hlsvis.rabbitmq.RabbitMqCommunication;
 import computergraphics.math.Vector3;
@@ -80,10 +79,16 @@ public class CGFrame extends AbstractCGFrame {
     private RabbitMqCommunication mqCommTransportLanes;
     private Date currentTime;
     
-    private List<TransportOrder> rememberedOrders = new ArrayList<>();
+    private List<TransportOrder> rememberedOrders = 
+    		Collections.synchronizedList(new LinkedList<>());
 	private TranslationNode translationNodeMobs;
-	private RabbitMqCommunication mqCommEvents;
+	private RabbitMqCommunication mqCommEvents; 
+	{       mqCommEvents = new RabbitMqCommunication(
+			HlsConstants.SENDUNGSEREIGNIS_QUEUE, HlsConstants.MQ_SERVER_URL, 
+			HlsConstants.MQ_USERNAME, HlsConstants.MQ_PASSWORD);
 	
+	        mqCommEvents.connect();
+	}
 	
 	private RabbitMqCommunication mqCommFreightContracts;
 	/** Assoziation zwischen dem graphischen objekt, und dem Frachtauftrag, das
@@ -252,44 +257,46 @@ public class CGFrame extends AbstractCGFrame {
 		/* 1. Alle auftraege rausholen, für die es schon so weit
 		 * ist, den Auftrag loszuschicken. */
 		//iterator verwenden um sicher zu löschen
-		Iterator<TransportOrder> ordersIterator = rememberedOrders.iterator();
-		while (ordersIterator.hasNext()) {
-			TransportOrder order = ordersIterator.next();
-			if (order.getStartTime().equals(currentTime) || 
-			    order.getStartTime().before(currentTime) ) {
-				  // Dann den auftrag entfernen!
-				  ordersIterator.remove();
-				  
-			      City startCity = TransportNetwork.getCity(
-			    		    order.getStartLocation()
-			    		  );
-			      double[] startCoords = startCity.getCoords();
-			      Vector3 startWaypoint = new Vector3(startCoords[0],0.0,
-			    		  startCoords[1]);
-			      
-			      City endCity = TransportNetwork.getCity(
-			    		  order.getTargetLocation()
-			    		 );
-			      double[] endCoords = endCity.getCoords();
-			      Vector3 endWaypoint = new Vector3(endCoords[0],0.0,endCoords[1]);		
-			      
-			      List<Vector3> deliveryRoute = 
-			    		  Arrays.asList(startWaypoint, endWaypoint);
-			     
-			      //Aus dem auftrag das paket in der visualisierung machen
-			     
-					try {
-						MovableObject mob = makeMoveableObject(HEIGHTMAP_PATH,
-								 MAX_HEIGHT, deliveryRoute, CUBE_PATH, 
-								 SCALE_FROM_RESOLUTION);
-						addToSceneGraph(mob);
-						sendTransportEventDeparted(order,startCoords);
-						
-						mobToOrderMap.put(mob, order);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-			   }
+		synchronized (rememberedOrders) {
+			Iterator<TransportOrder> ordersIterator = rememberedOrders.iterator();
+			while (ordersIterator.hasNext()) {
+				TransportOrder order = ordersIterator.next();
+				if (order.getStartTime().equals(currentTime) || 
+				    order.getStartTime().before(currentTime) ) {
+					  // Dann den auftrag entfernen!
+					  ordersIterator.remove();
+					  
+				      City startCity = TransportNetwork.getCity(
+				    		    order.getStartLocation()
+				    		  );
+				      double[] startCoords = startCity.getCoords();
+				      Vector3 startWaypoint = new Vector3(startCoords[0],0.0,
+				    		  startCoords[1]);
+				      
+				      City endCity = TransportNetwork.getCity(
+				    		  order.getTargetLocation()
+				    		 );
+				      double[] endCoords = endCity.getCoords();
+				      Vector3 endWaypoint = new Vector3(endCoords[0],0.0,endCoords[1]);		
+				      
+				      List<Vector3> deliveryRoute = 
+				    		  Arrays.asList(startWaypoint, endWaypoint);
+				     
+				      //Aus dem auftrag das paket in der visualisierung machen
+				     
+						try {
+							MovableObject mob = makeMoveableObject(HEIGHTMAP_PATH,
+									 MAX_HEIGHT, deliveryRoute, CUBE_PATH, 
+									 SCALE_FROM_RESOLUTION);
+							addToSceneGraph(mob);
+							sendTransportEvent(order,mob,EventType.ABGEFAHREN);
+							
+							mobToOrderMap.put(mob, order);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+				   }
+			}
 		}
 			tickAllMobs(currentTime);
 			
@@ -309,43 +316,33 @@ public class CGFrame extends AbstractCGFrame {
 			simulator.tick(currentTime);
 	}
 
-	// Methoden, um Nachrichten an die RabbitMQ abzuschicken
-	private void sendTransportEventDeparted(TransportOrder order, 
-			double[] startCoords) 
+	/** Methode, um Nachrichten an die RabbitMQ abzuschicken */
+	private void sendTransportEvent(TransportOrder order, MovableObject mob, 
+			TransportEvent.EventType eventType) 
 	{
-		mqCommEvents = 
-				new RabbitMqCommunication(HlsConstants.SENDUNGSEREIGNIS_QUEUE, 
-						HlsConstants.MQ_SERVER_URL, HlsConstants.MQ_USERNAME, 
-						HlsConstants.MQ_PASSWORD);
-		mqCommEvents.connect();
+		double[] coords = null;
+		switch (eventType) {
+		case ABGEFAHREN: { 
+			City start = TransportNetwork.getCity(order.getStartLocation());
+			coords = start.getCoords();
+		    break; 
+			}
+		case ANGEKOMMEN: { 
+			City end = TransportNetwork.getCity(order.getTargetLocation());
+			coords = end.getCoords();
+			break; 
+			}
+		case UNTERWEGS: { 
+			Vector3 somewhere = mob.getPositionNow();
+			coords = somewhere.data();
+			break; 
+			}
+		}
 		
-		TransportEvent transportEvent = new TransportEvent(
-				order.getDeliveryNumber(), order.getOrderNumber(),
-				currentTime, TransportEvent.EventType.ABGEFAHREN, startCoords);
+		TransportEvent transportEvent = new TransportEvent(order.getDeliveryNumber(),
+			order.getOrderNumber(), currentTime, eventType, coords);
 		
 		mqCommEvents.sendMessage(transportEvent.toJson());
-		
-		//TODO Möglicherweise queue nur einmal öffnen (wegen performance)
-		mqCommEvents.disconnect();
-	}
-	
-	private void sendTransportEventArrived(TransportOrder order,
-			double[] endCoords)
-	{
-		mqCommEvents = 
-				new RabbitMqCommunication(HlsConstants.SENDUNGSEREIGNIS_QUEUE, 
-						HlsConstants.MQ_SERVER_URL, HlsConstants.MQ_USERNAME, 
-						HlsConstants.MQ_PASSWORD);
-		mqCommEvents.connect();
-		
-		TransportEvent transportEvent = new TransportEvent(
-				order.getDeliveryNumber(), order.getOrderNumber(),
-				currentTime, TransportEvent.EventType.ANGEKOMMEN, endCoords);
-		
-		mqCommEvents.sendMessage(transportEvent.toJson());
-		
-		//TODO Möglicherweise queue nur einmal öffnen (wegen performance)
-		mqCommEvents.disconnect();
 	}
 	
 	private void addToSceneGraph(MovableObject mob) {
@@ -368,14 +365,13 @@ public class CGFrame extends AbstractCGFrame {
 					(double)(endTime.getTime() - startTime.getTime());
 			
 			if(statusUpdateNecessary(startTime,currentTime,EVERY_N_MINUTES)) {
-				sendTransportEventEnRoute(order,mob);
+				sendTransportEvent(order,mob,EventType.UNTERWEGS);
 			}
 			
-			if(alpha > 1.0){
-				double[] endCoords = TransportNetwork
-						.getCity(order.getTargetLocation())
-						.getCoords();
-				sendTransportEventArrived(order, endCoords);
+			if(alpha > 1.0) {
+				sendTransportEvent(order, mob,EventType.ANGEKOMMEN);
+				translationNodeMobs.removeChild(mob);
+				mobToOrderMap.remove(mob);
 			}
 			
 			mob.tick(alpha); 
@@ -383,29 +379,7 @@ public class CGFrame extends AbstractCGFrame {
 	}
 	
 	
-	private void sendTransportEventEnRoute(TransportOrder order,
-			MovableObject mob) {
-		Vector3 position = mob.getPositionNow();
-		
-		double[] coords = {position.get(0), position.get(2)};
-		
-		
-		mqCommEvents = 
-				new RabbitMqCommunication(HlsConstants.SENDUNGSEREIGNIS_QUEUE, 
-						HlsConstants.MQ_SERVER_URL, HlsConstants.MQ_USERNAME, 
-						HlsConstants.MQ_PASSWORD);
-		mqCommEvents.connect();
-		
-		TransportEvent transportEvent = new TransportEvent(
-				order.getDeliveryNumber(), order.getOrderNumber(),
-				currentTime, TransportEvent.EventType.UNTERWEGS, coords);
-		
-		mqCommEvents.sendMessage(transportEvent.toJson());
-		
-		//TODO Möglicherweise queue nur einmal öffnen (wegen performance)
-		mqCommEvents.disconnect();
-		
-	}
+	
 	
 	/**
 	 * Prüft, ob der zeitstempel "now" n (oder ein vielfaches von n)
