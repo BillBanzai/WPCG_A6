@@ -24,7 +24,8 @@ public class HlsSimulator {
 	 * RabbitMQ-Communiction
 	 */
 	private RabbitMqCommunication transportOrderQueue = new RabbitMqCommunication(
-			HlsConstants.FRACHTAUFTRAG_QUEUE, "127.0.0.1", "hls", "hls");
+			HlsConstants.FRACHTAUFTRAG_QUEUE, HlsConstants.MQ_SERVER_URL,
+			HlsConstants.MQ_USERNAME, HlsConstants.MQ_PASSWORD);
 
 	private Date lastOrderTime;
 

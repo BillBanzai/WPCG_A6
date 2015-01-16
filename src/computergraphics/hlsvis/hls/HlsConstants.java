@@ -51,5 +51,10 @@ public interface HlsConstants {
 	 * Number of minutes until the HLS simulator creates a new order.
 	 */
 	public static final int NEW_ORDER_INTERVAL = 30;
+	
+	
+	public static final String MQ_PASSWORD = "Rwj9joAi";
+	public static final String MQ_USERNAME = "CGTeams";
+	public static final String MQ_SERVER_URL = "win-devel.informatik.haw-hamburg.de";
 
 }

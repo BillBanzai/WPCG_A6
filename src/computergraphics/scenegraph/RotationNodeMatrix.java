@@ -18,7 +18,7 @@ import computergraphics.math.Matrix3;
  */
 public class RotationNodeMatrix extends Node {
 	
-	private Matrix3 matrix;
+	private Matrix3 matrix = new Matrix3();
 
 	/**
 	 * Sorgt daf�r, dass alle Kindknoten dieses Knotens relativ zu einer 

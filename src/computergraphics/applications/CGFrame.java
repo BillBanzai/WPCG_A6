@@ -17,6 +17,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimerTask;
@@ -30,6 +32,8 @@ import computergraphics.framework.AbstractCGFrame;
 import computergraphics.hlsvis.hls.City;
 import computergraphics.hlsvis.hls.Connections;
 import computergraphics.hlsvis.hls.HlsConstants;
+import computergraphics.hlsvis.hls.HlsSimulator;
+import computergraphics.hlsvis.hls.TransportEvent;
 import computergraphics.hlsvis.hls.TransportNetwork;
 import computergraphics.hlsvis.hls.TransportOrder;
 import computergraphics.hlsvis.rabbitmq.IMessageCallback;
@@ -51,6 +55,8 @@ import computergraphics.scenegraph.MovableObject;
  */
 public class CGFrame extends AbstractCGFrame {
 
+	private static final int EVERY_N_MINUTES = 15;
+	private static final String STARTING_TIME = "2014-12-08 00:00:00";
 	private static final String HEIGHTMAP_PATH = "img/hoehenkarte_deutschland.png";
 	private static final String COLOR_PATH = "img/karte_deutschland.jpg";
 	/**
@@ -65,16 +71,37 @@ public class CGFrame extends AbstractCGFrame {
 	private static final Vector3 PLANE_SCALE = new Vector3(1.0/128d,1.0/128d,1.0/128d);
 	private static final int DEFAULT_RESOLUTION = 1006; //8x8
 	private static final int ELAPSED_MINUTES_AFTER_TICK = 5;
+	private static final long MILLIS_TO_MINUTES = 1000*60;
     
     //3. Die wegpunkte für die kugel erzeugen
     // Im uhrzeigersinn 
     
 	
-    private RabbitMqCommunication mqComm;
+    private RabbitMqCommunication mqCommTransportLanes;
     private Date currentTime;
     
     private List<TransportOrder> rememberedOrders = new ArrayList<>();
 	private TranslationNode translationNodeMobs;
+	private RabbitMqCommunication mqCommEvents;
+	
+	
+	private RabbitMqCommunication mqCommFreightContracts;
+	/** Assoziation zwischen dem graphischen objekt, und dem Frachtauftrag, das
+	 *  durch dieses MovableObject visualisiert wird. */
+	private IdentityHashMap<MovableObject,TransportOrder> mobToOrderMap = 
+			new IdentityHashMap<>();
+	{
+		mqCommFreightContracts = new RabbitMqCommunication(
+				HlsConstants.FRACHTAUFTRAG_QUEUE, HlsConstants.MQ_SERVER_URL, 
+				HlsConstants.MQ_USERNAME, HlsConstants.MQ_PASSWORD);
+		/* diese Connection einmal aufmachen und erst bei programmende wieder
+		 * schließen. TODO: Wo sollen wir diese queue wieder schließen?
+		 */
+		mqCommFreightContracts.connect();
+	}
+	
+	//Non-production Code
+	private HlsSimulator simulator = new HlsSimulator();
 
 	/**
 	 * Constructor.
@@ -84,7 +111,7 @@ public class CGFrame extends AbstractCGFrame {
 	public CGFrame(int timerInterval) throws IOException, ParseException {
 		super(timerInterval);
 		
-		currentTime = parseDate("2014-12-08 00:00:00");
+		currentTime = parseDate(STARTING_TIME);
 		
 		sendTransportationLanes();
 		
@@ -124,6 +151,7 @@ public class CGFrame extends AbstractCGFrame {
 		colorNodeMob.addChild(translationNodeMobs);
 
 		registerForFreightContracts();
+		
 		
 		timer.schedule(new TimerTask() {
 			@Override
@@ -166,19 +194,22 @@ public class CGFrame extends AbstractCGFrame {
             	rememberedOrders.add(order);
             }
         };
-        mqComm.registerMessageReceiver(receiver);
+        mqCommFreightContracts.registerMessageReceiver(receiver);
+        mqCommFreightContracts.waitForMessages();
     }
     private void sendTransportationLanes() {
         /* "Die Transportbeziehungen sind die Kanten im Graph." */
         Connections transportationLanes = new Connections();
         transportationLanes.initWithAllConnections();
-        mqComm = new RabbitMqCommunication(
+        mqCommTransportLanes = new RabbitMqCommunication(
                 HlsConstants.TRANSPORZBEZIEHUNGEN_QUEUE,
-                "win-devel.informatik.haw-hamburg.de", "CGTeams", "Rwj9joAi");
-        mqComm.connect();
+                HlsConstants.MQ_SERVER_URL, HlsConstants.MQ_USERNAME,
+                HlsConstants.MQ_PASSWORD);
+        mqCommTransportLanes.connect();
         /* "Senden Sie bei Programmstart die Transportbeziehungen an die 
          * richtige RabbitMQ‐Queue."*/
-        mqComm.sendMessage(transportationLanes.toJson());
+        mqCommTransportLanes.sendMessage(transportationLanes.toJson());
+        mqCommTransportLanes.disconnect();
     }
 
     private MovableObject makeMoveableObject(String heightmapPath,
@@ -217,22 +248,18 @@ public class CGFrame extends AbstractCGFrame {
 	 */
 	@Override
 	protected void timerTick() {
-		//1. Gemerkte aufträge nach Startzeit sortieren
-		Collections.sort(rememberedOrders, 
-				(TransportOrder o1, TransportOrder o2) -> 
-		        o1.getStartTime().compareTo(o2.getStartTime())
-		        );
 		
-		/* 2. Aktuellsten auftrag aus der queue rausholen, wenn es schon so weit
+		/* 1. Alle auftraege rausholen, für die es schon so weit
 		 * ist, den Auftrag loszuschicken. */
-		if (!rememberedOrders.isEmpty()) {
-			if (rememberedOrders.get(0).getStartTime().equals(currentTime) || 
-			    rememberedOrders.get(0).getStartTime().before(currentTime) ) {
-				  //dann das objekt losschicken! 
-				  /*TODO: Code so umschreiben, dass mehrere objekte pro tick los-
-				   * geschickt werden können */
-			      TransportOrder order = rememberedOrders.remove(0);
-			      
+		//iterator verwenden um sicher zu löschen
+		Iterator<TransportOrder> ordersIterator = rememberedOrders.iterator();
+		while (ordersIterator.hasNext()) {
+			TransportOrder order = ordersIterator.next();
+			if (order.getStartTime().equals(currentTime) || 
+			    order.getStartTime().before(currentTime) ) {
+				  // Dann den auftrag entfernen!
+				  ordersIterator.remove();
+				  
 			      City startCity = TransportNetwork.getCity(
 			    		    order.getStartLocation()
 			    		  );
@@ -256,13 +283,15 @@ public class CGFrame extends AbstractCGFrame {
 								 MAX_HEIGHT, deliveryRoute, CUBE_PATH, 
 								 SCALE_FROM_RESOLUTION);
 						addToSceneGraph(mob);
+						sendTransportEventDeparted(order,startCoords);
+						
+						mobToOrderMap.put(mob, order);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 			   }
 		}
-		
-			tickAllMobs();
+			tickAllMobs(currentTime);
 			
 			/* currentTime erhöhen - was für ein frickel-code... */ 
 			
@@ -276,18 +305,124 @@ public class CGFrame extends AbstractCGFrame {
 			
 			//Inkrementierten Kalender wieder zu datum umwandeln
 			currentTime = calendarInstance.getTime();
+			
+			simulator.tick(currentTime);
 	}
 
+	// Methoden, um Nachrichten an die RabbitMQ abzuschicken
+	private void sendTransportEventDeparted(TransportOrder order, 
+			double[] startCoords) 
+	{
+		mqCommEvents = 
+				new RabbitMqCommunication(HlsConstants.SENDUNGSEREIGNIS_QUEUE, 
+						HlsConstants.MQ_SERVER_URL, HlsConstants.MQ_USERNAME, 
+						HlsConstants.MQ_PASSWORD);
+		mqCommEvents.connect();
+		
+		TransportEvent transportEvent = new TransportEvent(
+				order.getDeliveryNumber(), order.getOrderNumber(),
+				currentTime, TransportEvent.EventType.ABGEFAHREN, startCoords);
+		
+		mqCommEvents.sendMessage(transportEvent.toJson());
+		
+		//TODO Möglicherweise queue nur einmal öffnen (wegen performance)
+		mqCommEvents.disconnect();
+	}
+	
+	private void sendTransportEventArrived(TransportOrder order,
+			double[] endCoords)
+	{
+		mqCommEvents = 
+				new RabbitMqCommunication(HlsConstants.SENDUNGSEREIGNIS_QUEUE, 
+						HlsConstants.MQ_SERVER_URL, HlsConstants.MQ_USERNAME, 
+						HlsConstants.MQ_PASSWORD);
+		mqCommEvents.connect();
+		
+		TransportEvent transportEvent = new TransportEvent(
+				order.getDeliveryNumber(), order.getOrderNumber(),
+				currentTime, TransportEvent.EventType.ANGEKOMMEN, endCoords);
+		
+		mqCommEvents.sendMessage(transportEvent.toJson());
+		
+		//TODO Möglicherweise queue nur einmal öffnen (wegen performance)
+		mqCommEvents.disconnect();
+	}
+	
 	private void addToSceneGraph(MovableObject mob) {
 		translationNodeMobs.addChild(mob);	
 	}
 	
-	private void tickAllMobs() {
+	//Weitere hilfsmethoden 
+	
+	private void tickAllMobs(Date currentTime) {
 		for (int i = 0; i < translationNodeMobs.getNumberOfChildren(); i++) {
-			((MovableObject)translationNodeMobs.getChildNode(i)).tick(); 
+			// alpha = (currentTime - startTime) / (endTime - startTime)
+			MovableObject mob = (MovableObject) translationNodeMobs.getChildNode(i);
+			TransportOrder order = mobToOrderMap.get(mob);
+			
+			Date startTime = order.getStartTime();
+			Date endTime = order.getDeliveryTime();
+					
+			double alpha = (double)
+					(currentTime.getTime() - startTime.getTime()) / 
+					(double)(endTime.getTime() - startTime.getTime());
+			
+			if(statusUpdateNecessary(startTime,currentTime,EVERY_N_MINUTES)) {
+				sendTransportEventEnRoute(order,mob);
+			}
+			
+			if(alpha > 1.0){
+				double[] endCoords = TransportNetwork
+						.getCity(order.getTargetLocation())
+						.getCoords();
+				sendTransportEventArrived(order, endCoords);
+			}
+			
+			mob.tick(alpha); 
 		}
 	}
 	
+	
+	private void sendTransportEventEnRoute(TransportOrder order,
+			MovableObject mob) {
+		Vector3 position = mob.getPositionNow();
+		
+		double[] coords = {position.get(0), position.get(2)};
+		
+		
+		mqCommEvents = 
+				new RabbitMqCommunication(HlsConstants.SENDUNGSEREIGNIS_QUEUE, 
+						HlsConstants.MQ_SERVER_URL, HlsConstants.MQ_USERNAME, 
+						HlsConstants.MQ_PASSWORD);
+		mqCommEvents.connect();
+		
+		TransportEvent transportEvent = new TransportEvent(
+				order.getDeliveryNumber(), order.getOrderNumber(),
+				currentTime, TransportEvent.EventType.UNTERWEGS, coords);
+		
+		mqCommEvents.sendMessage(transportEvent.toJson());
+		
+		//TODO Möglicherweise queue nur einmal öffnen (wegen performance)
+		mqCommEvents.disconnect();
+		
+	}
+	
+	/**
+	 * Prüft, ob der zeitstempel "now" n (oder ein vielfaches von n)
+	 * minuten nach startTime ist
+	 * @param startTime
+	 * @param now
+	 * @param nMinutes
+	 * @return
+	 */
+	private boolean statusUpdateNecessary(Date startTime, Date now, int nMinutes) {
+		
+		//Von millisekunden nach Minuten umrechnen 
+		long difference = now.getTime() - startTime.getTime();
+		long differenceInMinutes = difference * MILLIS_TO_MINUTES;
+		
+		return differenceInMinutes % nMinutes == 0;
+	}
 	/**
 	 * Program entry point.
 	 * @throws IOException 

@@ -52,6 +52,7 @@ public class MovableObject extends Node {
         this.waypoints.addAll(waypoints);
         this.terrainFile = terrainFile;
         this.maxHeight = maxHeight;
+        this.positionNow = waypoints.get(0);
     }
     /** Elternknoten **/
     private Node parentNode;
@@ -76,25 +77,33 @@ public class MovableObject extends Node {
     
     //position wird im Translations-Knoten gesetzt
     
-    private double alpha = 0.0;
 
     /**Die Höheninformationen, auf denen das Höhenfeld basiert.*/
     private BufferedImage terrainFile;
     
     private double maxHeight;
+
+	private Vector3 positionNow;
     
-    /** "Damit Bewegung in die Szene kommt, muss sich der Wert von alpha zur
+    public Vector3 getPositionNow() {
+		return positionNow;
+	}
+
+	public void setPositionNow(Vector3 positionNow) {
+		this.positionNow = positionNow;
+	}
+
+	/** "Damit Bewegung in die Szene kommt, muss sich der Wert von alpha zur
      * Laufzeit verändern. Implementieren Sie dazu in der Klasse MoveableObjects
      * eine Methode tick()"
      */
-    public void tick() {
+    public void tick(double alpha) {
         //1.Aktuelle Position berechnen
         //Position p0: aktueller Wegpunkt waypoints.get(0)
         Vector3 p0 = waypoints.get(0);
         //Position p1: nächster Wegpunkt waypoints.get(1)
         Vector3 p1 = waypoints.get(1);
-        //(1-alpha)*p0 + alpha*p1
-        Vector3 positionNow = p0.multiply(1-alpha).add(p1.multiply(alpha)); 
+        positionNow = p0.multiply(1-alpha).add(p1.multiply(alpha)); 
         
         //1b. y-Wert basierend auf x und z setzen 
         double x = positionNow.get(0),z = positionNow.get(2);
@@ -117,12 +126,10 @@ public class MovableObject extends Node {
 //        alpha += (INTERPOLATION_INCREMENT);
         // 3. Alpha erhöhen (Konstante Geschwindigkeit)
         Vector3 directionVector = p0.subtract(p1);
-        alpha += INTERPOLATION_INCREMENT*(1/directionVector.getNorm());
         
         /* Wenn wir fertig sind, alpha zurück auf 0 setzen und 
          * knoten aus dem graphen entfernen */
         if(alpha > 1.0) {
-            alpha = 0;
             detachSelf();
         }
         
