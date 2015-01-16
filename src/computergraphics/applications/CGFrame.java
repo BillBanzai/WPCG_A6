@@ -64,7 +64,7 @@ public class CGFrame extends AbstractCGFrame {
 	private static final Vector3 SCALE_FROM_RESOLUTION = new Vector3(1.0/64d,1.0/64d,1.0/64d);
 	private static final Vector3 PLANE_SCALE = new Vector3(1.0/128d,1.0/128d,1.0/128d);
 	private static final int DEFAULT_RESOLUTION = 1006; //8x8
-	private static final int ELAPSED_TIME_AFTER_TICK = 0;
+	private static final int ELAPSED_MINUTES_AFTER_TICK = 5;
     
     //3. Die wegpunkte für die kugel erzeugen
     // Im uhrzeigersinn 
@@ -272,7 +272,7 @@ public class CGFrame extends AbstractCGFrame {
 			calendarInstance.setTime(currentTime);
 			
 			//Kalender inkrementieren
-			calendarInstance.add(Calendar.MINUTE, ELAPSED_TIME_AFTER_TICK);
+			calendarInstance.add(Calendar.MINUTE, ELAPSED_MINUTES_AFTER_TICK);
 			
 			//Inkrementierten Kalender wieder zu datum umwandeln
 			currentTime = calendarInstance.getTime();
