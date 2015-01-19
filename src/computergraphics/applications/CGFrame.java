@@ -111,6 +111,7 @@ public class CGFrame extends AbstractCGFrame {
     private ITriangleMesh planeMesh;
     
     private int transportCount = 0;
+    private BufferedImage heightmapFromFile;
 
 	/**
 	 * Constructor.
@@ -173,6 +174,8 @@ public class CGFrame extends AbstractCGFrame {
         objIO.einlesen(PLANE_PATH, planeMesh);
         
         ((TriangleMesh)planeMesh).calculateAllNormals();
+        
+        heightmapFromFile = ImageIO.read(new File(heightmapPath));
         
 		
 		timer.schedule(new TimerTask() {
@@ -247,8 +250,6 @@ public class CGFrame extends AbstractCGFrame {
         //2b. Skalierung der kugel von ScaleNode
         Vector3 scale = scaleNode;
         
-        //4. Höhenwerte bereitstellen durch einlesen
-        BufferedImage heightmapFile = ImageIO.read(new File(heightmapPath));
         
         // 3 MoveableObject erzeugen mit einem der 3 obigen Pfaden
         // Da das Flugzeug-Model falsch orientiert ist, muss es einmal um 90° gedreht werden
@@ -256,7 +257,8 @@ public class CGFrame extends AbstractCGFrame {
         Vector3 rotAxis = new Vector3(0,1,0);
         
         return new MovableObject(mObjectNode, scale ,
-                rotAxis, rotAngle, wegpunkt,heightmapFile, maxHeight, translationNodeMobs);
+                rotAxis, rotAngle, wegpunkt,heightmapFromFile, maxHeight, 
+                translationNodeMobs);
     }
 
     /*

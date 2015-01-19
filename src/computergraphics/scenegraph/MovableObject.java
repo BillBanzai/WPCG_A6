@@ -21,8 +21,6 @@ import computergraphics.math.Vector3;
 /** Diese Klasse ermöglicht es, bewegte Objekte im Szenengraph darzustellen.*/
 public class MovableObject extends Node {
     
-    /*"Darin wird der Wert von α um einen festen Wert erhöht (z.B. 0.05)"*/
-    private static final double INTERPOLATION_INCREMENT = 0.005;
 
     private static final Vector3 UP_VECTOR = new Vector3(0,1,0);
 
@@ -32,7 +30,6 @@ public class MovableObject extends Node {
         /* Den Objektgraphen aus geometryNode, scaleNode, rotationNode, 
            translationNode und this zusammenbauen */
         this.geometryNode = geometryNode;
-        this.parentNode = parentNode;
         
         
         scaleNode = new ScaleNode(scale);
@@ -54,8 +51,6 @@ public class MovableObject extends Node {
         this.maxHeight = maxHeight;
         this.positionNow = waypoints.get(0);
     }
-    /** Elternknoten **/
-    private Node parentNode;
     
     /** "Er beinhaltet auf unterster Ebene die Geometrie des Objektes." */
     private Node geometryNode; //TriangleMeshNode,SingleTriangleNode,etc.
