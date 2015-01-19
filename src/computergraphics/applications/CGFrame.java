@@ -108,6 +108,9 @@ public class CGFrame extends AbstractCGFrame {
 	//Non-production Code
 	private HlsSimulator simulator = new HlsSimulator();
     private ITriangleMesh boxMesh;
+    private ITriangleMesh planeMesh;
+    
+    private int transportCount = 0;
 
 	/**
 	 * Constructor.
@@ -164,7 +167,13 @@ public class CGFrame extends AbstractCGFrame {
         objIO.einlesen(CUBE_PATH, boxMesh);
         
         ((TriangleMesh)boxMesh).calculateAllNormals();
-		
+        
+        planeMesh = new TriangleMesh();
+        
+        objIO.einlesen(PLANE_PATH, planeMesh);
+        
+        ((TriangleMesh)planeMesh).calculateAllNormals();
+        
 		
 		timer.schedule(new TimerTask() {
 			@Override
@@ -229,9 +238,11 @@ public class CGFrame extends AbstractCGFrame {
             double maxHeight, List<Vector3> wegpunkt, String objPath,
             Vector3 scaleNode) throws IOException {
         
+        ITriangleMesh mesh = objPath.equals(CUBE_PATH)  ? boxMesh   :
+                             objPath.equals(PLANE_PATH) ? planeMesh : null;
         
-        //2a. Kugel in ein TriangleMeshNode stecken
-        TriangleMeshNodeTexture mObjectNode = new TriangleMeshNodeTexture(boxMesh);
+        //2a. Würfel/Flugzeug in ein TriangleMeshNode stecken
+        TriangleMeshNodeTexture mObjectNode = new TriangleMeshNodeTexture(mesh);
         
         //2b. Skalierung der kugel von ScaleNode
         Vector3 scale = scaleNode;
@@ -286,17 +297,33 @@ public class CGFrame extends AbstractCGFrame {
 				     
 				      //Aus dem auftrag das paket in der visualisierung machen
 				     
-						try {
-							MovableObject mob = makeMoveableObject(HEIGHTMAP_PATH,
-									 MAX_HEIGHT, deliveryRoute, CUBE_PATH, 
-									 SCALE_FROM_RESOLUTION);
-							addToSceneGraph(mob);
-							sendTransportEvent(order,mob,EventType.ABGEFAHREN);
-							
-							mobToOrderMap.put(mob, order);
+						try { 
+						    
+						    MovableObject mob = null;
+						    
+						    if (transportCount % 6 == 0) {
+						        //Jede sechste lieferung per flugzeug liefern
+						        mob = makeMoveableObject(HEIGHTMAP_PATH,
+                                        MAX_HEIGHT, deliveryRoute, PLANE_PATH, 
+                                        PLANE_SCALE);
+						        
+						    }
+						    else {
+        						mob = makeMoveableObject(HEIGHTMAP_PATH,
+        								 MAX_HEIGHT, deliveryRoute, CUBE_PATH, 
+        								 SCALE_FROM_RESOLUTION);
+						    }
+        						addToSceneGraph(mob);
+        						sendTransportEvent(order,mob,EventType.ABGEFAHREN);
+        						
+        						mobToOrderMap.put(mob, order);
+        						
+        						
+						   	
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
+						transportCount++;
 				   }
 			}
 		}
@@ -316,6 +343,8 @@ public class CGFrame extends AbstractCGFrame {
 			currentTime = calendarInstance.getTime();
 			
 			simulator.tick(currentTime);
+			
+			
 	}
 
 	/** Methode, um Nachrichten an die RabbitMQ abzuschicken */
