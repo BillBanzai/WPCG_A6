@@ -107,6 +107,7 @@ public class CGFrame extends AbstractCGFrame {
 	
 	//Non-production Code
 	private HlsSimulator simulator = new HlsSimulator();
+    private ITriangleMesh boxMesh;
 
 	/**
 	 * Constructor.
@@ -156,6 +157,13 @@ public class CGFrame extends AbstractCGFrame {
 		colorNodeMob.addChild(translationNodeMobs);
 
 		registerForFreightContracts();
+		
+		boxMesh = new TriangleMesh();
+		
+		ObjIO objIO = new ObjIO();
+        objIO.einlesen(CUBE_PATH, boxMesh);
+        
+        ((TriangleMesh)boxMesh).calculateAllNormals();
 		
 		
 		timer.schedule(new TimerTask() {
@@ -220,16 +228,10 @@ public class CGFrame extends AbstractCGFrame {
     private MovableObject makeMoveableObject(String heightmapPath,
             double maxHeight, List<Vector3> wegpunkt, String objPath,
             Vector3 scaleNode) throws IOException {
-        //1. Das Object erzeugen 
-        ITriangleMesh mObject = new TriangleMesh();
         
-        ObjIO objIO = new ObjIO();
-        objIO.einlesen(objPath, mObject);
-        
-        ((TriangleMesh)mObject).calculateAllNormals();
         
         //2a. Kugel in ein TriangleMeshNode stecken
-        TriangleMeshNodeTexture mObjectNode = new TriangleMeshNodeTexture(mObject);
+        TriangleMeshNodeTexture mObjectNode = new TriangleMeshNodeTexture(boxMesh);
         
         //2b. Skalierung der kugel von ScaleNode
         Vector3 scale = scaleNode;
