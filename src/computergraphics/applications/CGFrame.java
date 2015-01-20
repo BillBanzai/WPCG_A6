@@ -239,7 +239,7 @@ public class CGFrame extends AbstractCGFrame {
 
     private MovableObject makeMoveableObject(String heightmapPath,
             double maxHeight, List<Vector3> wegpunkt, String objPath,
-            Vector3 scaleNode) throws IOException {
+            Vector3 scaleNode, boolean flying) throws IOException {
         
         ITriangleMesh mesh = objPath.equals(CUBE_PATH)  ? boxMesh   :
                              objPath.equals(PLANE_PATH) ? planeMesh : null;
@@ -258,7 +258,7 @@ public class CGFrame extends AbstractCGFrame {
         
         return new MovableObject(mObjectNode, scale ,
                 rotAxis, rotAngle, wegpunkt,heightmapFromFile, maxHeight, 
-                translationNodeMobs);
+                translationNodeMobs, flying);
     }
 
     /*
@@ -307,13 +307,13 @@ public class CGFrame extends AbstractCGFrame {
 						        //Jede sechste lieferung per flugzeug liefern
 						        mob = makeMoveableObject(HEIGHTMAP_PATH,
                                         MAX_HEIGHT, deliveryRoute, PLANE_PATH, 
-                                        PLANE_SCALE);
+                                        PLANE_SCALE,true);
 						        
 						    }
 						    else {
         						mob = makeMoveableObject(HEIGHTMAP_PATH,
         								 MAX_HEIGHT, deliveryRoute, CUBE_PATH, 
-        								 SCALE_FROM_RESOLUTION);
+        								 SCALE_FROM_RESOLUTION,false);
 						    }
         						addToSceneGraph(mob);
         						sendTransportEvent(order,mob,EventType.ABGEFAHREN);

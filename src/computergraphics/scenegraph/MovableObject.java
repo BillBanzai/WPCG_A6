@@ -26,7 +26,7 @@ public class MovableObject extends Node {
 
     public MovableObject(Node geometryNode,Vector3 scale, Vector3 rotAxis, 
             float rotAngle, List<Vector3> waypoints,BufferedImage terrainFile,
-            double maxHeight, Node parentNode) {
+            double maxHeight, Node parentNode, boolean flying) {
         /* Den Objektgraphen aus geometryNode, scaleNode, rotationNode, 
            translationNode und this zusammenbauen */
         this.geometryNode = geometryNode;
@@ -50,6 +50,7 @@ public class MovableObject extends Node {
         this.terrainFile = terrainFile;
         this.maxHeight = maxHeight;
         this.positionNow = waypoints.get(0);
+        this.flying = flying;
     }
     
     /** "Er beinhaltet auf unterster Ebene die Geometrie des Objektes." */
@@ -79,6 +80,8 @@ public class MovableObject extends Node {
     private double maxHeight;
 
 	private Vector3 positionNow;
+	
+	private boolean flying;
     
     public Vector3 getPositionNow() {
 		return positionNow;
@@ -112,7 +115,7 @@ public class MovableObject extends Node {
          * Höhenfelds befinden". */
         y += scaleNode.getScale().get(1); 
         
-        positionNow.set(1, y);
+        positionNow.set(1, flying ? (-Math.pow(2 * alpha -1,2) + 1) /3.0 : y);
         
         //2.Berechnete position im Translationsknoten setzen
         translationNode.setFactor(positionNow);
